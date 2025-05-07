@@ -40,12 +40,19 @@
       border: none;
       font-size: 18px;
     }
+    .popup-image {
+      max-width: 100%;
+      max-height: 150px;
+      height: auto;
+      margin-top: 6px;
+      display: block;
+    }
   </style>
 </head>
 <body>
 <div id="map"></div>
 <div id="opacityWrapper">
-  <button id="toggleOpacity" title="Toggle opacity control">🗺️</button>
+  <button id="toggleOpacity" title="Toggle opacity control">🎚️</button>
   <div id="opacityControls">
     <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.8" />
   </div>
@@ -90,7 +97,11 @@
 
     new mapboxgl.Marker({ color: 'green' })
       .setLngLat([39.271406, -7.046950])
-      .setPopup(new mapboxgl.Popup().setText('House 5\niHelp Eco Village, Mkuranga, Tanzania'))
+      .setPopup(new mapboxgl.Popup().setHTML(`
+        <strong>House 5</strong><br>
+        iHelp Eco Village, Mkuranga, Tanzania<br>
+        <img class="popup-image" src="https://passivehouseplus.co.uk/media/k2/items/cache/66a54350e94d9d93612885188af705a6_XL.jpg?t=20250108_163553" alt="House 5 Image" />
+      `))
       .addTo(map);
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
