@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>2Köppen-Geiger Globe - Mapbox</title>
+  <title>Köppen-Geiger Globe - Mapbox</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
@@ -34,12 +34,12 @@
 <body>
 <div id="map"></div>
 <div id="opacityWrapper">
-  <label for="opacitySlider">✪</label>
+  <label for="opacitySlider">🗂</label>
   <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.8" />
 </div>
 
 <script>
-  mapboxgl.accessToken = 'pk.eyJ1IjoiYXJjaHdydGgiLCJhIjoiY21hZHZpb3Y0MDB3czJxcjZxNjMyNjV5ayJ9.Z5pVSBUcI3HDeALtF6YIiA'; // Replace with your real token
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYXJjaHdydGgiLCJhIjoiY21hZHZpb3Y0MDB3czJxcjZxNjMyNjV5ayJ9.Z5pVSBUcI3HDeALtF6YIiA';
 
   const map = new mapboxgl.Map({
     container: 'map',
@@ -52,11 +52,10 @@
   });
 
   map.on('style.load', () => {
-    map.setFog({}); // Enables globe atmosphere
+    map.setFog({});
   });
 
   map.on('load', () => {
-    // Load GeoJSON overlay
     map.addSource('koppen', {
       type: 'geojson',
       data: './koppen.json'
@@ -67,52 +66,16 @@
       type: 'fill',
       source: 'koppen',
       paint: {
-        'fill-color': [
-          'match', ['get', 'climate'],
-          'Af Tropical-Rainforest', '#0000ff',
-          'Am Tropical-Monsoon', '#0078ff',
-          'Aw Tropical-Savanna', '#46aafc',
-          'BWh Arid-Desert-Hot', '#ff0000',
-          'BWk Arid-Desert-Cold', '#ff9696',
-          'BSh Arid-Steppe-Hot', '#f5a500',
-          'BSk Arid-Steppe-Cold', '#ffe064',
-          'Csa Temperate-Dry_Summer-Hot_Summer', '#ffff00',
-          'Csb Temperate-Dry_Summer-Warm_Summer', '#c8c800',
-          'Csc Temperate-Dry_Summer-Cold_Summer', '#969696',
-          'Cwa Temperate-Dry_Winter-Hot_Summer', '#969696',
-          'Cwb Temperate-Dry_Winter-Warm_Summer', '#64c864',
-          'Cwc Temperate-Dry_Winter-Cold_Summer', '#329632',
-          'Cfa Temperate-Withouth_dry_season-Hot_Summer', '#c8ff50',
-          'Cfb Temperate-Withouth_dry_season-Warm_Summer', '#64ff32',
-          'Cfc Temperate-Withouth_dry_season-Cold_Summer', '#32c800',
-          'Dfa Cold-Withouth_dry_season-Hot_Summer', '#00ffff',
-          'Dfb Cold-Withouth_dry_season-Warm_Summer', '#82caff',
-          'Dfc Cold-Withouth_dry_season-Cold_Summer', '#00aaff',
-          'Dsa Cold-Dry_Summer-Hot_Summer', '#ff00ff',
-          'Dsb Cold-Dry_Summer-Warm_Summer', '#c8c8ff',
-          'Dsc Cold-Dry_Summer-Cold_Summer', '#9696ff',
-          'Dsd Cold-Dry_Summer-Very_Cold_Winter', '#6464ff',
-          'Dwa Cold-Dry_Winter-Hot_Summer', '#aaf0ff',
-          'Dwb Cold-Dry_Winter-Warm_Summer', '#82aaff',
-          'Dwc Cold-Dry_Winter-Cold_Summer', '#4c7aff',
-          'Dwd Cold-Dry_Winter-Very_Cold_Winter', '#3246ff',
-          'EF Polar-Frost', '#666666',
-          'ET Polar-Tundra', '#b2b2b2',
-          '#aaaaaa'
-        ],
+        'fill-color': ['get', 'fill'],
         'fill-opacity': 0.8
       }
     });
 
-    // Slider control
     document.getElementById('opacitySlider').addEventListener('input', (e) => {
       map.setPaintProperty('koppen-layer', 'fill-opacity', parseFloat(e.target.value));
     });
 
-    // Marker pin
-    new mapboxgl.Marker({
-      color: 'green'
-    })
+    new mapboxgl.Marker({ color: 'green' })
       .setLngLat([39.271406, -7.046950])
       .setPopup(new mapboxgl.Popup().setText('House 5\niHelp Eco Village, Mkuranga, Tanzania'))
       .addTo(map);
