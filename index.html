@@ -17,28 +17,30 @@
 </head>
 <body>
   <div id="cesiumContainer"></div>
-  <script>
-    const viewer = new Cesium.Viewer('cesiumContainer', {
-      baseLayerPicker: false,
-      sceneModePicker: false,
-      timeline: false,
-      animation: false
-      // No terrain to avoid createWorldTerrain issue
-    });
+<script>
+  Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0ZmQ4OGM4Zi1jNDJlLTRjZTMtOTRiNC0xNDYwNDBjZTJiM2YiLCJpZCI6MzAwMzIyLCJpYXQiOjE3NDY2MTc5Njl9.N6z71U7Y3c2D1XLKj4vDgMANc0Y6W6PJ1i_q5iIhA7w';
 
-    // Example marker
-    viewer.entities.add({
-      position: Cesium.Cartesian3.fromDegrees(39.271406, -7.046950),
-      billboard: {
-        image: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-        scale: 1.2
-      },
-      name: "House 5",
-      description: "iHelp Eco Village, Mkuranga, Tanzania"
-    });
+  const viewer = new Cesium.Viewer('cesiumContainer', {
+    imageryProvider: Cesium.createWorldImagery(),
+    baseLayerPicker: false,
+    sceneModePicker: false,
+    timeline: false,
+    animation: false
+  });
 
-    viewer.zoomTo(viewer.entities);
-  </script>
+  viewer.entities.add({
+    position: Cesium.Cartesian3.fromDegrees(39.271406, -7.046950),
+    billboard: {
+      image: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+      verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+      scale: 1.2
+    },
+    name: "House 5",
+    description: "iHelp Eco Village, Mkuranga, Tanzania"
+  });
+
+  viewer.zoomTo(viewer.entities);
+</script>
+
 </body>
 </html>
