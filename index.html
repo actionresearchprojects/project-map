@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>zoomKöppen-Geiger Globe - Mapbox</title>
+  <title>Köppen-Geiger Globe - Mapbox</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
@@ -19,7 +19,7 @@
     #opacityWrapper {
       position: absolute;
       top: 10px;
-      right: 10px;
+      left: 10px;
       background: white;
       padding: 8px 12px;
       border-radius: 6px;
@@ -28,14 +28,27 @@
     }
     #opacitySlider {
       width: 100px;
+      margin-top: 6px;
+    }
+    #opacityControls {
+      display: none;
+      margin-top: 6px;
+    }
+    #toggleOpacity {
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
 <div id="map"></div>
 <div id="opacityWrapper">
-  <label for="opacitySlider">📒</label>
-  <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.8" />
+  <button id="toggleOpacity" title="Toggle opacity control">🗺️</button>
+  <div id="opacityControls">
+    <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.8" />
+  </div>
 </div>
 
 <script>
@@ -80,7 +93,12 @@
       .setPopup(new mapboxgl.Popup().setText('House 5\niHelp Eco Village, Mkuranga, Tanzania'))
       .addTo(map);
 
-    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
+    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
+  });
+
+  document.getElementById('toggleOpacity').addEventListener('click', () => {
+    const control = document.getElementById('opacityControls');
+    control.style.display = control.style.display === 'none' ? 'block' : 'none';
   });
 </script>
 </body>
