@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Cesium Globe</title>
+  <title>Cesium Globe Fallback</title>
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js"></script>
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
   <style>
@@ -17,30 +17,33 @@
 </head>
 <body>
   <div id="cesiumContainer"></div>
-<script>
-  Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0ZmQ4OGM4Zi1jNDJlLTRjZTMtOTRiNC0xNDYwNDBjZTJiM2YiLCJpZCI6MzAwMzIyLCJpYXQiOjE3NDY2MTc5Njl9.N6z71U7Y3c2D1XLKj4vDgMANc0Y6W6PJ1i_q5iIhA7w';
+  <script>
+    Cesium.Ion.defaultAccessToken = 'YOUR_TOKEN_HERE';
 
-  const viewer = new Cesium.Viewer('cesiumContainer', {
-    imageryProvider: Cesium.createWorldImagery(),
-    baseLayerPicker: false,
-    sceneModePicker: false,
-    timeline: false,
-    animation: false
-  });
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+      imageryProvider: new Cesium.BingMapsImageryProvider({
+        url: "https://dev.virtualearth.net",
+        key: "Ato6rVf_a7CW1wLu6o0Mys6nWWJxTQ1y6Rx3ps04rN9kWYwnslJv9uAaX12_hOa5", // public Cesium sample key
+        mapStyle: Cesium.BingMapsStyle.AERIAL
+      }),
+      baseLayerPicker: false,
+      sceneModePicker: false,
+      animation: false,
+      timeline: false
+    });
 
-  viewer.entities.add({
-    position: Cesium.Cartesian3.fromDegrees(39.271406, -7.046950),
-    billboard: {
-      image: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-      verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-      scale: 1.2
-    },
-    name: "House 5",
-    description: "iHelp Eco Village, Mkuranga, Tanzania"
-  });
+    viewer.entities.add({
+      position: Cesium.Cartesian3.fromDegrees(39.271406, -7.046950),
+      billboard: {
+        image: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        scale: 1.2
+      },
+      name: "House 5",
+      description: "iHelp Eco Village, Mkuranga, Tanzania"
+    });
 
-  viewer.zoomTo(viewer.entities);
-</script>
-
+    viewer.zoomTo(viewer.entities);
+  </script>
 </body>
 </html>
