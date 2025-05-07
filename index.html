@@ -21,11 +21,13 @@
     Cesium.Ion.defaultAccessToken = 'YOUR_TOKEN_HERE';
 
     const viewer = new Cesium.Viewer('cesiumContainer', {
-      imageryProvider: new Cesium.BingMapsImageryProvider({
-        url: "https://dev.virtualearth.net",
-        key: "Ato6rVf_a7CW1wLu6o0Mys6nWWJxTQ1y6Rx3ps04rN9kWYwnslJv9uAaX12_hOa5", // public Cesium sample key
-        mapStyle: Cesium.BingMapsStyle.AERIAL
-      }),
+      const viewer = new Cesium.Viewer('cesiumContainer', {
+        baseLayerPicker: true,  // optional UI for switching layers
+        sceneModePicker: false,
+        animation: false,
+        timeline: false
+      });
+
       baseLayerPicker: false,
       sceneModePicker: false,
       animation: false,
