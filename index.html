@@ -40,10 +40,6 @@
       max-width: 300px;
     }
 
-    .control-block {
-      margin-bottom: 12px;
-    }
-
     button.toggle-button {
       cursor: pointer;
       background: none;
@@ -53,6 +49,10 @@
       width: 100%;
       text-align: left;
       padding: 6px 0;
+    }
+
+    button#toggleLegend {
+      margin-top: 8px;
     }
 
     #opacityControls {
@@ -106,18 +106,14 @@
 <body>
 <div id="map"></div>
 <div id="opacityWrapper">
-  <div class="control-block">
-    <button id="toggleOpacity" class="toggle-button" title="Toggle opacity control">Show Climate Zones</button>
-    <div id="opacityControls">
-      <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" />
-    </div>
+  <button id="toggleOpacity" class="toggle-button" title="Toggle opacity control">Show Climate Zones</button>
+  <div id="opacityControls">
+    <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" />
   </div>
 
-  <div class="control-block">
-    <button id="toggleLegend" class="toggle-button" title="Toggle legend">Show Legend</button>
-    <div id="legendContainer">
-      <img src="https://i.ibb.co/ZzT1K3gk/legend.png" alt="Climate Zones Legend" />
-    </div>
+  <button id="toggleLegend" class="toggle-button" title="Toggle legend">Show Legend</button>
+  <div id="legendContainer">
+    <img src="https://i.ibb.co/ZzT1K3gk/legend.png" alt="Climate Zones Legend" />
   </div>
 </div>
 
