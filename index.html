@@ -8,16 +8,25 @@
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
   <style>
+    body, html,
+    #opacityWrapper,
+    #toggleOpacity,
+    .mapboxgl-ctrl,
+    .mapboxgl-popup-content {
+      font-family: 'Ubuntu', sans-serif !important;
+    }
+
     body, html {
       margin: 0;
       padding: 0;
       height: 100%;
-      font-family: 'Ubuntu', sans-serif;
     }
+
     #map {
       width: 100%;
       height: 100%;
     }
+
     #opacityWrapper {
       position: absolute;
       top: 10px;
@@ -28,20 +37,24 @@
       box-shadow: 0 0 6px rgba(0,0,0,0.15);
       z-index: 10;
     }
+
     #opacitySlider {
       width: 100px;
       margin-top: 6px;
     }
+
     #opacityControls {
       display: none;
       margin-top: 6px;
     }
+
     #toggleOpacity {
       cursor: pointer;
       background: none;
       border: none;
       font-size: 18px;
     }
+
     .popup-image {
       max-width: 100%;
       max-height: 150px;
@@ -55,12 +68,6 @@
 <div id="map"></div>
 <div id="opacityWrapper">
   <button id="toggleOpacity" title="Toggle opacity control">Show Climate Zones</button>
-  <div id="opacityControls">
-    <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" />
-  </div>
-</div>
-  <div id="opacityWrapper">
-  <button id="toggleOpacity" title="Toggle opacity control">Show Legend</button>
   <div id="opacityControls">
     <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" />
   </div>
