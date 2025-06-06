@@ -36,23 +36,41 @@
       border-radius: 6px;
       box-shadow: 0 0 6px rgba(0,0,0,0.15);
       z-index: 10;
+      max-width: 300px;
     }
 
-    #opacitySlider {
-      width: 100px;
-      margin-top: 6px;
-    }
-
-    #opacityControls {
-      display: none;
-      margin-top: 6px;
-    }
-
-    #toggleOpacity {
+    button.toggle-button {
       cursor: pointer;
       background: none;
       border: none;
       font-size: 18px;
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 6px 0;
+    }
+
+    #opacityControls {
+      margin-top: 6px;
+      display: none;
+    }
+
+    #opacitySlider {
+      width: 100%;
+    }
+
+    #legendContainer {
+      margin-top: 6px;
+      display: none;
+      width: 100%;
+    }
+
+    #legendContainer img {
+      width: 100%;
+      height: auto;
+      display: block;
+      max-height: 200px; /* adjust as needed */
+      object-fit: contain;
     }
 
     .popup-image {
@@ -67,9 +85,14 @@
 <body>
 <div id="map"></div>
 <div id="opacityWrapper">
-  <button id="toggleOpacity" title="Toggle opacity control">Show Climate Zones</button>
+  <button id="toggleOpacity" class="toggle-button" title="Toggle opacity control">Show Climate Zones</button>
   <div id="opacityControls">
     <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" />
+  </div>
+
+  <button id="toggleLegend" class="toggle-button" title="Toggle legend">Show Legend</button>
+  <div id="legendContainer">
+    <img src="https://i.ibb.co/ZzT1K3gk/legend.png" alt="Climate Zones Legend" />
   </div>
 </div>
 
@@ -113,8 +136,8 @@
     // Approximate pin location
     const pinCoords = [39.271406, -7.046950];
 
-    // Marker with colour #fafab6
-    new mapboxgl.Marker({ color: '#fafab6' })
+    // Marker with colour #e8e192
+    new mapboxgl.Marker({ color: '#e8e192' })
       .setLngLat(pinCoords)
       .setPopup(new mapboxgl.Popup().setHTML(`
         <strong>House 5</strong><br>
@@ -164,7 +187,7 @@
       type: 'fill',
       source: 'circle',
       paint: {
-        'fill-color': '#fafab6',
+        'fill-color': '#e8e192',
         'fill-opacity': 0.15
       }
     });
@@ -174,7 +197,7 @@
       type: 'line',
       source: 'circle',
       paint: {
-        'line-color': '#fafab6',
+        'line-color': '#e8e192',
         'line-width': 1
       }
     });
@@ -182,9 +205,15 @@
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
   });
 
+  // Toggle controls independently
   document.getElementById('toggleOpacity').addEventListener('click', () => {
-    const control = document.getElementById('opacityControls');
-    control.style.display = control.style.display === 'none' ? 'block' : 'none';
+    const opacityControls = document.getElementById('opacityControls');
+    opacityControls.style.display = opacityControls.style.display === 'none' ? 'block' : 'none';
+  });
+
+  document.getElementById('toggleLegend').addEventListener('click', () => {
+    const legendContainer = document.getElementById('legendContainer');
+    legendContainer.style.display = legendContainer.style.display === 'none' ? 'block' : 'none';
   });
 </script>
 </body>
