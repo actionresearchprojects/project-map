@@ -113,8 +113,8 @@
     // Approximate pin location
     const pinCoords = [39.271406, -7.046950];
 
-    // White marker
-    new mapboxgl.Marker({ color: 'fafab6' })
+    // Marker with colour #fafab6
+    new mapboxgl.Marker({ color: '#fafab6' })
       .setLngLat(pinCoords)
       .setPopup(new mapboxgl.Popup().setHTML(`
         <strong>House 5</strong><br>
@@ -164,7 +164,7 @@
       type: 'fill',
       source: 'circle',
       paint: {
-        'fill-color': 'fafab6',
+        'fill-color': '#fafab6',
         'fill-opacity': 0.15
       }
     });
@@ -174,7 +174,7 @@
       type: 'line',
       source: 'circle',
       paint: {
-        'line-color': 'fafab6',
+        'line-color': '#fafab6',
         'line-width': 1
       }
     });
