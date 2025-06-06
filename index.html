@@ -8,15 +8,14 @@
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
   <style>
-  body, html,
-  #opacityWrapper,
-  #toggleOpacity,
-  #toggleLegend,
-  .mapboxgl-ctrl,
-  .mapboxgl-popup-content {
-    font-family: 'Ubuntu', sans-serif !important;
-  }
-
+    body, html,
+    #opacityWrapper,
+    #toggleOpacity,
+    #toggleLegend,
+    .mapboxgl-ctrl,
+    .mapboxgl-popup-content {
+      font-family: 'Ubuntu', sans-serif !important;
+    }
 
     body, html {
       margin: 0;
@@ -41,6 +40,10 @@
       max-width: 300px;
     }
 
+    .control-block {
+      margin-bottom: 12px;
+    }
+
     button.toggle-button {
       cursor: pointer;
       background: none;
@@ -50,11 +53,10 @@
       width: 100%;
       text-align: left;
       padding: 6px 0;
-      margin-bottom: 6px;
     }
 
     #opacityControls {
-      margin-bottom: 12px;
+      margin-top: 6px;
       display: none;
     }
 
@@ -104,14 +106,18 @@
 <body>
 <div id="map"></div>
 <div id="opacityWrapper">
-  <button id="toggleOpacity" class="toggle-button" title="Toggle opacity control">Show Climate Zones</button>
-  <div id="opacityControls">
-    <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" />
+  <div class="control-block">
+    <button id="toggleOpacity" class="toggle-button" title="Toggle opacity control">Show Climate Zones</button>
+    <div id="opacityControls">
+      <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" />
+    </div>
   </div>
 
-  <button id="toggleLegend" class="toggle-button" title="Toggle legend">Show Legend</button>
-  <div id="legendContainer">
-    <img src="https://i.ibb.co/Tq4m28dB/Koppen-geiger-overlay-1.jpg" alt="Climate Zones Legend" />
+  <div class="control-block">
+    <button id="toggleLegend" class="toggle-button" title="Toggle legend">Show Legend</button>
+    <div id="legendContainer">
+      <img src="https://i.ibb.co/ZzT1K3gk/legend.png" alt="Climate Zones Legend" />
+    </div>
   </div>
 </div>
 
