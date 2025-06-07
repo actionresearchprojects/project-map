@@ -10,6 +10,7 @@
   <style>
     body, html,
     #opacityWrapper,
+    #legendWrapper,
     #toggleOpacity,
     #toggleLegend,
     .mapboxgl-ctrl,
@@ -28,20 +29,24 @@
       height: 100%;
     }
 
-    #opacityWrapper {
+    #opacityWrapper,
+    #legendWrapper {
       position: absolute;
-      top: 10px;
       left: 10px;
       background: white;
       padding: 8px 12px;
       border-radius: 6px;
       box-shadow: 0 0 6px rgba(0,0,0,0.15);
-      z-index: 10;
       max-width: 300px;
+      z-index: 10;
     }
 
-    .control-group {
-      margin-bottom: 16px;
+    #opacityWrapper {
+      top: 10px;
+    }
+
+    #legendWrapper {
+      top: 110px; /* Adjust this spacing as needed */
     }
 
     button.toggle-button {
@@ -55,18 +60,13 @@
       padding: 6px 0;
     }
 
-    #opacityControls {
+    #opacityControls,
+    #legendContainer {
       margin-top: 6px;
       display: none;
     }
 
     #opacitySlider {
-      width: 100%;
-    }
-
-    #legendContainer {
-      margin-top: 8px;
-      display: none;
       width: 100%;
     }
 
@@ -92,7 +92,8 @@
         padding: 4px 0;
       }
 
-      #opacityWrapper {
+      #opacityWrapper,
+      #legendWrapper {
         max-width: 200px;
         padding: 6px 10px;
       }
@@ -105,20 +106,19 @@
 </head>
 <body>
 <div id="map"></div>
+
 <div id="opacityWrapper">
-  <button id="toggleOpacity" class="toggle-button" title="Toggle opacity control" style="margin-bottom: 10px;">
-    Show Climate Zones
-  </button>
-  <div id="opacityControls" style="display: none;">
+  <button id="toggleOpacity" class="toggle-button" title="Toggle opacity control">Show Climate Zones</button>
+  <div id="opacityControls">
     <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" />
   </div>
+</div>
 
-  <button id="toggleLegend" class="toggle-button" title="Toggle legend">
-    Show Legend
-  </button>
-  <div id="legendContainer" style="display: none; margin-top: 6px;">
+<div id="legendWrapper">
+  <button id="toggleLegend" class="toggle-button" title="Toggle legend">Show Legend</button>
+  <div id="legendContainer">
     <a href="https://doi.org/10.1038/s41597-023-02549-6" target="_blank" rel="noopener noreferrer">
-      <img src="https://i.ibb.co/ZzT1K3gk/legend.png" alt="Climate Zones Legend" style="width: 100%; height: auto; display: block; max-height: 200px; object-fit: contain;" />
+      <img src="https://i.ibb.co/ZzT1K3gk/legend.png" alt="Climate Zones Legend" />
     </a>
   </div>
 </div>
