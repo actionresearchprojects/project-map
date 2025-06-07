@@ -46,7 +46,7 @@
     }
 
     #legendWrapper {
-      top: 110px; /* Adjust this spacing as needed */
+      top: 70px; /* adjusted for closer spacing */
     }
 
     button.toggle-button {
@@ -162,7 +162,7 @@
 
     const pinCoords = [39.252324, -7.056898];
 
-    new mapboxgl.Marker({ color: '#FF0000' })
+    new mapboxgl.Marker({ color: '#FF0000' }) // red pin
       .setLngLat(pinCoords)
       .setPopup(new mapboxgl.Popup().setHTML(`
         <a href="https://passivehouseplus.co.uk/magazine/feature/tanzanian-children-s-eco-village-aims-to-inspire-low-carbon-example"
@@ -171,8 +171,8 @@
           <div style="font-family: 'Ubuntu', sans-serif;">
             <strong>House 5</strong><br>
             iHelp Eco Village, Mkuranga, Tanzania<br>
-            <span style="color: #FF0000;">Tropical Savannah (Aw)</span><br>
-            <span style="font-style: italic; color: black;">Marked location is not exact.</span><br>
+            <span style="color: #62a7f2;">Tropical Savannah (Aw)</span><br>
+            <span style="font-style: italic; color: black;">Marked area is not exact.</span><br>
             <img class="popup-image" src="https://passivehouseplus.co.uk/media/k2/items/cache/66a54350e94d9d93612885188af705a6_XL.jpg?t=20250108_163553" alt="House 5 Image" />
           </div>
         </a>
