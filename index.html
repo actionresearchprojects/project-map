@@ -40,6 +40,10 @@
       max-width: 300px;
     }
 
+    .control-group {
+      margin-bottom: 16px;
+    }
+
     button.toggle-button {
       cursor: pointer;
       background: none;
@@ -49,10 +53,6 @@
       width: 100%;
       text-align: left;
       padding: 6px 0;
-    }
-
-    #toggleLegend {
-      margin-top: 10px;
     }
 
     #opacityControls {
@@ -65,7 +65,7 @@
     }
 
     #legendContainer {
-      margin-top: 6px;
+      margin-top: 8px;
       display: none;
       width: 100%;
     }
@@ -106,16 +106,20 @@
 <body>
 <div id="map"></div>
 <div id="opacityWrapper">
-  <button id="toggleOpacity" class="toggle-button" title="Toggle opacity control">Show Climate Zones</button>
-  <div id="opacityControls">
-    <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" />
+  <div class="control-group">
+    <button id="toggleOpacity" class="toggle-button" title="Toggle opacity control">Show Climate Zones</button>
+    <div id="opacityControls">
+      <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" />
+    </div>
   </div>
 
-  <button id="toggleLegend" class="toggle-button" title="Toggle legend">Show Legend</button>
-  <div id="legendContainer">
-    <a href="https://doi.org/10.1038/s41597-023-02549-6" target="_blank" rel="noopener noreferrer">
-      <img src="https://i.ibb.co/ZzT1K3gk/legend.png" alt="Climate Zones Legend" />
-    </a>
+  <div class="control-group">
+    <button id="toggleLegend" class="toggle-button" title="Toggle legend">Show Legend</button>
+    <div id="legendContainer">
+      <a href="https://doi.org/10.1038/s41597-023-02549-6" target="_blank" rel="noopener noreferrer">
+        <img src="https://i.ibb.co/ZzT1K3gk/legend.png" alt="Climate Zones Legend" />
+      </a>
+    </div>
   </div>
 </div>
 
@@ -161,7 +165,9 @@
     new mapboxgl.Marker({ color: '#e8e192' })
       .setLngLat(pinCoords)
       .setPopup(new mapboxgl.Popup().setHTML(`
-        <a href="https://passivehouseplus.co.uk/magazine/feature/tanzanian-children-s-eco-village-aims-to-inspire-low-carbon-example" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit;">
+        <a href="https://passivehouseplus.co.uk/magazine/feature/tanzanian-children-s-eco-village-aims-to-inspire-low-carbon-example"
+           target="_blank" rel="noopener noreferrer"
+           style="text-decoration: none; color: inherit; border: none; outline: none;">
           <div style="font-family: 'Ubuntu', sans-serif;">
             <strong>House 5</strong><br>
             iHelp Eco Village, Mkuranga, Tanzania<br>
