@@ -37,8 +37,8 @@
       padding: 8px 12px;
       border-radius: 6px;
       box-shadow: 0 0 6px rgba(0,0,0,0.15);
-      max-width: 300px;
       z-index: 10;
+      max-width: 300px;
     }
 
     #opacityWrapper {
@@ -46,7 +46,7 @@
     }
 
     #legendWrapper {
-      top: 70px; /* adjusted for closer spacing */
+      top: 70px;
     }
 
     button.toggle-button {
@@ -60,8 +60,7 @@
       padding: 6px 0;
     }
 
-    #opacityControls,
-    #legendContainer {
+    #opacityControls {
       margin-top: 6px;
       display: none;
     }
@@ -70,12 +69,19 @@
       width: 100%;
     }
 
+    #legendContainer {
+      margin-top: 6px;
+      display: none;
+      width: 100%;
+    }
+
     #legendContainer img {
       width: 100%;
       height: auto;
       display: block;
-      max-height: 200px;
       object-fit: contain;
+      max-height: 300px;
+      image-rendering: auto;
     }
 
     .popup-image {
@@ -162,19 +168,15 @@
 
     const pinCoords = [39.252324, -7.056898];
 
-    new mapboxgl.Marker({ color: '#FF0000' }) // red pin
+    new mapboxgl.Marker({ color: '#FF0000' })
       .setLngLat(pinCoords)
       .setPopup(new mapboxgl.Popup().setHTML(`
-        <a href="https://passivehouseplus.co.uk/magazine/feature/tanzanian-children-s-eco-village-aims-to-inspire-low-carbon-example"
-           target="_blank" rel="noopener noreferrer"
-           style="text-decoration: none; color: inherit; border: none; outline: none;">
-          <div style="font-family: 'Ubuntu', sans-serif;">
-            <strong>House 5</strong><br>
-            iHelp Eco Village, Mkuranga, Tanzania<br>
-            <span style="color: #62a7f2;">Tropical Savannah (Aw)</span><br>
-            <span style="font-style: italic; color: black;">Marked area is not exact.</span><br>
-            <img class="popup-image" src="https://passivehouseplus.co.uk/media/k2/items/cache/66a54350e94d9d93612885188af705a6_XL.jpg?t=20250108_163553" alt="House 5 Image" />
-          </div>
+        <a href="https://passivehouseplus.co.uk/magazine/feature/tanzanian-children-s-eco-village-aims-to-inspire-low-carbon-example" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit; font-family: 'Ubuntu', sans-serif;">
+          <strong>House 5</strong><br>
+          iHelp Eco Village, Mkuranga, Tanzania<br>
+          <span style="color: #62a7f2;">Tropical Savannah (Aw)</span><br>
+          <span style="font-style: italic; color: black;">Marked area is not exact.</span><br>
+          <img class="popup-image" src="https://passivehouseplus.co.uk/media/k2/items/cache/66a54350e94d9d93612885188af705a6_XL.jpg?t=20250108_163553" alt="House 5 Image" />
         </a>
       `))
       .addTo(map);
