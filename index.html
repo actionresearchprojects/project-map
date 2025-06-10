@@ -107,15 +107,6 @@
   </div>
 
   <script>
-    // GDPR masking
-    function generateMaskedCoords(lat, lon, radiusKm) {
-      const R = 6371000;
-      const distance = Math.random() * radiusKm * 1000;
-      const angle = Math.random() * 2 * Math.PI;
-      const dLat = distance * Math.cos(angle) / R;
-      const dLon = distance * Math.sin(angle) / (R * Math.cos(lat * Math.PI/180));
-      return [ lon + dLon * 180/Math.PI, lat + dLat * 180/Math.PI ];
-    }
 
     // Create circle polygon
     function createGeoJSONCircle(center, radiusKm, points = 64) {
