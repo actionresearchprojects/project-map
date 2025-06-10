@@ -6,87 +6,146 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
   <style>
-    html, body { margin:0; padding:0; height:100% }
-    #map { width:100%; height:100% }
-    .popup-image { max-width:100%; max-height:150px }
-    /* your controlWrapper styles */
+    html, body { margin:0; padding:0; height:100%; }
+    #map { width:100%; height:100%; }
+    #controlWrapper {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.15);
+      z-index: 10;
+      max-width: 300px;
+    }
+    .toggle-button {
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 18px;
+      width: 100%;
+      text-align: left;
+      padding: 6px 0;
+    }
+    #opacityControls, #legendContainer {
+      margin-top: 6px;
+      display: none;
+    }
+    #opacitySlider { width: 100%; }
+    #legendContainer img { width: 100%; height: auto; max-height: 300px; object-fit: contain; }
+    .popup-image { max-width:100%; max-height:150px; display:block; margin-top:6px; }
+    @media (max-width:600px) {
+      #controlWrapper { max-width:200px; padding:6px 10px; }
+      .toggle-button { font-size:14px; padding:4px 0; }
+      #legendContainer img { max-height:150px; }
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
 
+  <div id="controlWrapper">
+    <button id="toggleOpacity" class="toggle-button">Show Climate Zones</button>
+    <div id="opacityControls">
+      <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" />
+    </div>
+    <button id="toggleLegend" class="toggle-button">Show Legend</button>
+    <div id="legendContainer">
+      <a href="https://doi.org/10.1038/s41597-023-02549-6" target="_blank" rel="noopener noreferrer">
+        <img src="https://i.ibb.co/ZzT1K3gk/legend.png" alt="Climate Zones Legend" />
+      </a>
+    </div>
+  </div>
+
   <script>
-    // 1. Helpers
+    // Helper: generate masked coords if GDPR
     function generateMaskedCoords(lat, lon, radiusKm) {
       const R = 6371000;
-      const distance = Math.random()*radiusKm*1000;
-      const angle = Math.random()*2*Math.PI;
-      const δLat = distance*Math.cos(angle)/R;
-      const δLon = distance*Math.sin(angle)/(R*Math.cos(lat*Math.PI/180));
-      return [ lon + δLon*180/Math.PI, lat + δLat*180/Math.PI ];
+      const distance = Math.random() * radiusKm * 1000;
+      const angle = Math.random() * 2 * Math.PI;
+      const δLat = distance * Math.cos(angle) / R;
+      const δLon = distance * Math.sin(angle) / (R * Math.cos(lat * Math.PI / 180));
+      return [ lon + δLon * 180/Math.PI, lat + δLat * 180/Math.PI ];
     }
 
-    function createGeoJSONCircle(center, radiusKm, points=64) {
+    // Helper: draw circle
+    function createGeoJSONCircle(center, radiusKm, points = 64) {
       const lat = center[1], lon = center[0];
-      const coords = [], dX = radiusKm/111.32, dY = radiusKm/110.574;
-      for (let i=0; i<points; i++){
-        const θ = 2*Math.PI*i/points;
-        coords.push([ lon + dX*Math.cos(θ), lat + dY*Math.sin(θ) ]);
+      const coords = [];
+      const dX = radiusKm / (111.32 * Math.cos(lat * Math.PI/180));
+      const dY = radiusKm / 110.574;
+      for (let i = 0; i < points; i++) {
+        const θ = (i / points) * 2 * Math.PI;
+        coords.push([ lon + dX * Math.cos(θ), lat + dY * Math.sin(θ) ]);
       }
       coords.push(coords[0]);
-      return { type:'Feature', geometry:{ type:'Polygon', coordinates:[coords] } };
+      return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] } };
     }
 
-    // 2. Map init
+    // Map init
     mapboxgl.accessToken = 'pk.eyJ1IjoiYXJjaHdydGgiLCJhIjoiY21hZHZpb3Y0MDB3czJxcjZxNjMyNjV5ayJ9.Z5pVSBUcI3HDeALtF6YIiA';
     const map = new mapboxgl.Map({
       container: 'map', style: 'mapbox://styles/mapbox/satellite-v9',
-      projection: 'globe', zoom:1.5, center:[39.271406,-7.046950]
+      projection: 'globe', zoom: 1.5, center: [39.271406, -7.046950], pitch: 0, bearing: 0
     });
 
     map.on('style.load', () => map.setFog({}));
 
     map.on('load', () => {
-      // load your GeoJSON of climate layers as before
+      // Climate layer
       map.addSource('koppen',{ type:'geojson', data:'./koppen.json' });
-      map.addLayer({ id:'koppen-layer', type:'fill', source:'koppen',
-        paint:{ 'fill-color':['get','fill'], 'fill-opacity':0.5 } });
+      map.addLayer({ id:'koppen-layer', type:'fill', source:'koppen', paint:{ 'fill-color':['get','fill'], 'fill-opacity':0.5 } });
 
-      // dynamically load pins
-      fetch('pins.json').then(r=>r.json()).then(points=>{
-        points.forEach(pt=>{
+      // Opacity slider
+      document.getElementById('opacitySlider').addEventListener('input', e => {
+        map.setPaintProperty('koppen-layer','fill-opacity', parseFloat(e.target.value));
+      });
+
+      // Load dynamic pins
+      fetch('pins.json').then(r => r.json()).then(points => {
+        points.forEach(pt => {
           const coords = pt.gdpr
             ? generateMaskedCoords(pt.latitude, pt.longitude, pt.radiusKm)
             : [pt.longitude, pt.latitude];
 
           new mapboxgl.Marker({ color: pt.colour }).setLngLat(coords)
             .setPopup(new mapboxgl.Popup().setHTML(`
-              <a href="${pt.link}" target="_blank" rel="noopener noreferrer"
-                 style="text-decoration:none;color:inherit;font-family:sans-serif">
+              <a href="${pt.link}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;font-family:'Ubuntu',sans-serif;">
                 <strong>${pt.title}</strong><br>
                 ${pt.address}<br>
-                <span style="color:${pt.zoneColour}">${pt.zoneText}</span><br>
+                <span style="color:${pt.zoneColour};">${pt.zoneText}</span><br>
                 ${pt.gdpr ? '<em>Marked area is not exact.</em><br>' : ''}
                 <img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" />
-              </a>`))
-            .addTo(map);
+              </a>
+            `)).addTo(map);
 
           if (pt.gdpr) {
             const circle = createGeoJSONCircle(coords, pt.radiusKm);
             const id = `circle-${pt.id}`;
             map.addSource(id, { type:'geojson', data: circle });
-            map.addLayer({ id:`${id}-fill`, type:'fill', source:id,
-              paint:{ 'fill-color':pt.colour,'fill-opacity':0.15 } });
-            map.addLayer({ id:`${id}-line`, type:'line', source:id,
-              paint:{ 'line-color':pt.colour,'line-width':1 } });
+            map.addLayer({ id:`${id}-fill`, type:'fill', source:id, paint:{ 'fill-color':pt.colour, 'fill-opacity':0.15 } });
+            map.addLayer({ id:`${id}-line`, type:'line', source:id, paint:{ 'line-color':pt.colour, 'line-width':1 } });
           }
         });
       });
 
+      // Navigation control
       map.addControl(new mapboxgl.NavigationControl({ showCompass:false }),'top-right');
     });
 
+    // Toggle buttons
+    document.getElementById('toggleOpacity').addEventListener('click', () => {
+      const el = document.getElementById('opacityControls');
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('toggleLegend').addEventListener('click', () => {
+      const el = document.getElementById('legendContainer');
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    });
   </script>
 </body>
 </html>
