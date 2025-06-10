@@ -8,7 +8,6 @@
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
   <style>
-    /* Global Ubuntu font */
     html, body,
     #controlWrapper,
     .toggle-button,
@@ -20,7 +19,6 @@
       font-family: 'Ubuntu', sans-serif !important;
     }
 
-    /* Make popup content fully clickable */
     .mapboxgl-popup-content a {
       display: block;
       text-decoration: none;
@@ -32,7 +30,6 @@
     html, body { margin: 0; padding: 0; height: 100%; }
     #map { width: 100%; height: 100%; }
 
-    /* Control box */
     #controlWrapper {
       position: absolute;
       top: 10px;
@@ -107,8 +104,6 @@
   </div>
 
   <script>
-
-    // Create circle polygon
     function createGeoJSONCircle(center, radiusKm, points = 64) {
       const lat = center[1], lon = center[0];
       const coords = [];
@@ -122,7 +117,6 @@
       return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] } };
     }
 
-    // Initialise map
     mapboxgl.accessToken = 'pk.eyJ1IjoiYXJjaHdydGgiLCJhIjoiY21hZHZpb3Y0MDB3czJxcjZxNjMyNjV5ayJ9.Z5pVSBUcI3HDeALtF6YIiA';
     const map = new mapboxgl.Map({
       container: 'map',
@@ -137,44 +131,36 @@
     map.on('style.load', () => map.setFog({}));
 
     map.on('load', () => {
-      // Climate layer
       map.addSource('koppen', { type: 'geojson', data: './koppen.json' });
-      map.addLayer({ id: 'koppen-layer', type: 'fill', source: 'koppen', paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.5 } });
+      map.addLayer({
+        id: 'koppen-layer',
+        type: 'fill',
+        source: 'koppen',
+        paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.5 }
+      });
 
-      // Opacity slider
       document.getElementById('opacitySlider').addEventListener('input', e => {
         map.setPaintProperty('koppen-layer', 'fill-opacity', parseFloat(e.target.value));
       });
 
-fetch('pins.json')
-  .then(res => res.json())
-  .then(points => {
-    points.forEach(pt => {
-      const coords = [pt.longitude, pt.latitude];  // Always use provided coords
+      fetch('pins.json')
+        .then(res => res.json())
+        .then(points => {
+          points.forEach(pt => {
+            const coords = [pt.longitude, pt.latitude];
 
-      new mapboxgl.Marker({ color: pt.colour })
-        .setLngLat(coords)
-        .setPopup(new mapboxgl.Popup().setHTML(
-          `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">` +
-            `<strong>${pt.title}</strong><br>` +
-            `${pt.address}<br>` +
-            `<span style="color:${pt.zoneColour};">${pt.zoneText}</span><br>` +
-            `${pt.gdpr ? '<em>Marked area is not exact.</em><br>' : ''}` +
-            `<img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" />` +
-          `</a>`
-        ))
-        .addTo(map);
-
-      if (pt.gdpr) {
-        const circle = createGeoJSONCircle(coords, pt.radiusKm);
-        const id = `circle-${pt.id}`;
-        map.addSource(id, { type: 'geojson', data: circle });
-        map.addLayer({ id: `${id}-fill`, type: 'fill', source: id, paint: { 'fill-color': pt.colour, 'fill-opacity': 0.15 } });
-        map.addLayer({ id: `${id}-line`, type: 'line', source: id, paint: { 'line-color': pt.colour, 'line-width': 1 } });
-      }
-    });
-  });
-
+            new mapboxgl.Marker({ color: pt.colour })
+              .setLngLat(coords)
+              .setPopup(new mapboxgl.Popup().setHTML(
+                `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">` +
+                  `<strong>${pt.title}</strong><br>` +
+                  `${pt.address}<br>` +
+                  `<span style="color:${pt.zoneColour};">${pt.zoneText}</span><br>` +
+                  `${pt.gdpr ? '<em>Marked area is not exact.</em><br>' : ''}` +
+                  `<img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" />` +
+                `</a>`
+              ))
+              .addTo(map);
 
             if (pt.gdpr) {
               const circle = createGeoJSONCircle(coords, pt.radiusKm);
@@ -186,11 +172,9 @@ fetch('pins.json')
           });
         });
 
-      // Navigation control
       map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
     });
 
-    // Toggle handlers
     document.getElementById('toggleOpacity').addEventListener('click', () => {
       const el = document.getElementById('opacityControls');
       el.style.display = el.style.display === 'block' ? 'none' : 'block';
