@@ -2,20 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Köppen-Geiger Globe</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Köppen-Geiger Globe</n  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
   <style>
-    /* Global Ubuntu font for all text */
-    html, body, .mapboxgl-ctrl, .mapboxgl-popup-content {
+    /* Global Ubuntu font */
+    html, body,
+    #controlWrapper,
+    .toggle-button,
+    #opacityControls,
+    #legendContainer,
+    input[type=range],
+    .mapboxgl-ctrl,
+    .mapboxgl-popup-content {
       font-family: 'Ubuntu', sans-serif !important;
     }
+
+    /* Make popup content fully clickable */
+    .mapboxgl-popup-content a {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      width: 100%;
+      height: 100%;
+    }
+
     html, body { margin: 0; padding: 0; height: 100%; }
     #map { width: 100%; height: 100%; }
 
-    /* Control box styling */
+    /* Control box */
     #controlWrapper {
       position: absolute;
       top: 10px;
@@ -26,7 +42,6 @@
       box-shadow: 0 0 6px rgba(0,0,0,0.15);
       z-index: 1000;
       max-width: 300px;
-      pointer-events: auto;
     }
 
     .toggle-button {
@@ -38,7 +53,6 @@
       width: fit-content;
       text-align: left;
       padding: 6px 0;
-      pointer-events: auto;
     }
 
     #opacityControls,
@@ -92,31 +106,31 @@
   </div>
 
   <script>
-    // Generate masked coords if GDPR is required
+    // GDPR masking
     function generateMaskedCoords(lat, lon, radiusKm) {
       const R = 6371000;
-      const dist = Math.random() * radiusKm * 1000;
-      const ang = Math.random() * 2 * Math.PI;
-      const dLat = dist * Math.cos(ang) / R;
-      const dLon = dist * Math.sin(ang) / (R * Math.cos(lat * Math.PI/180));
+      const distance = Math.random() * radiusKm * 1000;
+      const angle = Math.random() * 2 * Math.PI;
+      const dLat = distance * Math.cos(angle) / R;
+      const dLon = distance * Math.sin(angle) / (R * Math.cos(lat * Math.PI/180));
       return [ lon + dLon * 180/Math.PI, lat + dLat * 180/Math.PI ];
     }
 
-    // Draw a circle for masked areas
+    // Create circle polygon
     function createGeoJSONCircle(center, radiusKm, points = 64) {
       const lat = center[1], lon = center[0];
       const coords = [];
       const dX = radiusKm / (111.32 * Math.cos(lat * Math.PI/180));
       const dY = radiusKm / 110.574;
       for (let i = 0; i < points; i++) {
-        const θ = (i / points) * 2 * Math.PI;
+        const θ = 2 * Math.PI * i / points;
         coords.push([ lon + dX * Math.cos(θ), lat + dY * Math.sin(θ) ]);
       }
       coords.push(coords[0]);
       return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] } };
     }
 
-    // Initialise Mapbox map
+    // Initialise map
     mapboxgl.accessToken = 'pk.eyJ1IjoiYXJjaHdydGgiLCJhIjoiY21hZHZpb3Y0MDB3czJxcjZxNjMyNjV5ayJ9.Z5pVSBUcI3HDeALtF6YIiA';
     const map = new mapboxgl.Map({
       container: 'map',
@@ -131,7 +145,7 @@
     map.on('style.load', () => map.setFog({}));
 
     map.on('load', () => {
-      // Add climate layer
+      // Climate layer
       map.addSource('koppen', { type: 'geojson', data: './koppen.json' });
       map.addLayer({ id: 'koppen-layer', type: 'fill', source: 'koppen', paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.5 } });
 
@@ -140,7 +154,7 @@
         map.setPaintProperty('koppen-layer', 'fill-opacity', parseFloat(e.target.value));
       });
 
-      // Load dynamic pins
+      // Dynamic pins
       fetch('pins.json')
         .then(res => res.json())
         .then(points => {
@@ -151,13 +165,15 @@
 
             new mapboxgl.Marker({ color: pt.colour })
               .setLngLat(coords)
-              .setPopup(new mapboxgl.Popup().setHTML(`
-                <strong>${pt.title}</strong><br>
-                ${pt.address}<br>
-                <span style="color:${pt.zoneColour};">${pt.zoneText}</span><br>
-                ${pt.gdpr ? '<em>Marked area is not exact.</em><br>' : ''}
-                <img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" />
-              `))
+              .setPopup(new mapboxgl.Popup().setHTML(
+                `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">` +
+                  `<strong>${pt.title}</strong><br>` +
+                  `${pt.address}<br>` +
+                  `<span style="color:${pt.zoneColour};">${pt.zoneText}</span><br>` +
+                  `${pt.gdpr ? '<em>Marked area is not exact.</em><br>' : ''}` +
+                  `<img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" />` +
+                `</a>`
+              ))
               .addTo(map);
 
             if (pt.gdpr) {
@@ -170,7 +186,7 @@
           });
         });
 
-      // Add map navigation control
+      // Navigation control
       map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
     });
 
