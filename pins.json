@@ -12,19 +12,5 @@
     "radiusKm": 0,
     "imageUrl": "https://passivehouseplus.co.uk/media/k2/items/cache/66a54350e94d9d93612885188af705a6_XL.jpg?t=20250108_163553",
     "colour": "#FF0000"
-  },
-{
-  "id": "hOUse5",
-  "title": "hOUse5",
-  "link": "https://docs.google.com/spreadsheets/d/1qMzDtlJzQTJ5lqnsPv51XRyU8teKvg0msZ1ufwd7bfk/edit?gid=0#gid=0",
-  "address": "fefa",
-  "zoneText": "Hot Desert (BWh)",
-  "zoneColour": "#fe0000",
-  "latitude": 41.96847608254211,
-  "longitude": 54.021731941103695,
-  "gdpr": true,
-  "radiusKm": 5,
-  "imageUrl": "https://media.istockphoto.com/id/814423752/photo/eye-of-model-with-colorful-art-make-up-close-up.jpg?s=612x612&w=0&k=20&c=l15OdMWjgCKycMMShP8UK94ELVlEGvt7GmB_esHWPYE=",
-  "colour": "#FF0003"
-}
+  }
 ]
