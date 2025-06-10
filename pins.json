@@ -1,0 +1,17 @@
+[
+  {
+    "id": "house5",
+    "title": "House 5",
+    "link": "https://passivehouseplus.co.uk/magazine/feature/tanzanian-children-s-eco-village-aims-to-inspire-low-carbon-example",
+    "address": "iHelp Eco Village, Mkuranga, Tanzania",
+    "zoneText": "Tropical Savannah (Aw)",
+    "zoneColour": "#62a7f2",
+    "latitude": 39.252324,
+    "longitude": -7.056898,
+    "gdpr": true,
+    "radiusKm": 5,
+    "imageUrl": "https://passivehouseplus.co.uk/media/k2/items/cache/66a54350e94d9d93612885188af705a6_XL.jpg?t=20250108_163553",
+    "colour": "#FF0000"
+  }
+  // add more entries here
+]
