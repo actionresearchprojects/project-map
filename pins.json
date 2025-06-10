@@ -13,18 +13,18 @@
     "imageUrl": "https://passivehouseplus.co.uk/media/k2/items/cache/66a54350e94d9d93612885188af705a6_XL.jpg?t=20250108_163553",
     "colour": "#FF0000"
   },
-  {
-    "id": "test",
-    "title": "test",
-    "link": "https://passivehouseplus.co.uk/magazine/feature/tanzanian-children-s-eco-village-aims-to-inspire-low-carbon-example",
-    "address": "iHelp Eco Village, Mkuranga, Tanzania",
-    "zoneText": "Tropical Savannah (Aw)",
-    "zoneColour": "#62a7f2",
-    "latitude": 53.390848,
-    "longitude": -2.929307,
-    "gdpr": true,
-    "radiusKm": 0,
-    "imageUrl": "https://passivehouseplus.co.uk/media/k2/items/cache/66a54350e94d9d93612885188af705a6_XL.jpg?t=20250108_163553",
-    "colour": "#FF0000"
-  }
+{
+  "id": "site01",
+  "title": "site01",
+  "link": "",
+  "address": "2 aueens close",
+  "zoneText": "Tropical Rainforest (Af)",
+  "zoneColour": "##0000fe",
+  "latitude": -8.977216701537992,
+  "longitude": 3.0089923900696647,
+  "gdpr": true,
+  "radiusKm": 5,
+  "imageUrl": "",
+  "colour": "#fff000"
+}
 ]
