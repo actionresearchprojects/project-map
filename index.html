@@ -1,235 +1,81 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>Köppen-Geiger Globe - Mapbox</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
-  <style>
-    body, html,
-    .mapboxgl-ctrl,
-    .mapboxgl-popup-content {
-      font-family: 'Ubuntu', sans-serif !important;
-    }
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
+<style>
+  * {
+    box-sizing: border-box;
+  }
 
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-    }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 10px;
+    height: 100%;
+    width: 100%;
+    padding: 10px;
+    font-family: 'Ubuntu', sans-serif;
+  }
 
-    #map {
-      width: 100%;
-      height: 100%;
-    }
+  .grid a {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+  }
 
-    #controlWrapper {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: white;
-      padding: 8px 12px;
-      border-radius: 6px;
-      box-shadow: 0 0 6px rgba(0,0,0,0.15);
-      max-width: 300px;
-      z-index: 10;
-    }
+  .grid a img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.3s ease;
+  }
 
-    .toggle-button {
-      cursor: pointer;
-      background: none;
-      border: none;
-      font-size: 18px;
-      display: block;
-      width: 100%;
-      text-align: left;
-      padding: 6px 0;
-    }
+  .grid a::after {
+    content: "Demo";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 2em;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
 
-    #opacityControls,
-    #legendContainer {
-      margin-top: 6px;
-      display: none;
-    }
+  .grid a::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0);
+    transition: background-color 0.3s ease;
+    pointer-events: none;
+  }
 
-    #opacitySlider {
-      width: 100%;
-    }
+  .grid a:hover::before {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
 
-    #legendContainer img {
-      width: 100%;
-      height: auto;
-      display: block;
-      object-fit: contain;
-      max-height: 300px;
-      image-rendering: auto;
-    }
+  .grid a:hover::after {
+    opacity: 1;
+  }
+</style>
 
-    .popup-image {
-      max-width: 100%;
-      max-height: 150px;
-      height: auto;
-      margin-top: 6px;
-      display: block;
-    }
-
-    @media (max-width: 600px) {
-      #controlWrapper {
-        max-width: 200px;
-        padding: 6px 10px;
-      }
-
-      .toggle-button {
-        font-size: 14px;
-        padding: 4px 0;
-      }
-
-      #legendContainer img {
-        max-height: 150px;
-      }
-    }
-  </style>
-</head>
-<body>
-<div id="map"></div>
-
-<div id="controlWrapper">
-  <button id="toggleOpacity" class="toggle-button" title="Toggle opacity control">Show Climate Zones</button>
-  <div id="opacityControls">
-    <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" />
-  </div>
-
-  <button id="toggleLegend" class="toggle-button" title="Toggle legend">Show Legend</button>
-  <div id="legendContainer">
-    <a href="https://doi.org/10.1038/s41597-023-02549-6" target="_blank" rel="noopener noreferrer">
-      <img src="https://i.ibb.co/ZzT1K3gk/legend.png" alt="Climate Zones Legend" />
-    </a>
-  </div>
+<div class="grid">
+  <a href="https://actionresearchprojects.framer.website/pattern-guide-1">
+    <img src="https://raw.githubusercontent.com/archwrth/CBG-grid/main/house%20image.jpg" alt="Image 1">
+  </a>
+  <a href="https://actionresearchprojects.framer.website/pattern-guide-1">
+    <img src="https://raw.githubusercontent.com/archwrth/CBG-grid/main/house%20image.jpg" alt="Image 2">
+  </a>
+  <a href="https://actionresearchprojects.framer.website/pattern-guide-1">
+    <img src="https://raw.githubusercontent.com/archwrth/CBG-grid/main/house%20image.jpg" alt="Image 3">
+  </a>
+  <a href="https://actionresearchprojects.framer.website/pattern-guide-1">
+    <img src="https://raw.githubusercontent.com/archwrth/CBG-grid/main/house%20image.jpg" alt="Image 4">
+  </a>
 </div>
-
-<script>
-  mapboxgl.accessToken = 'pk.eyJ1IjoiYXJjaHdydGgiLCJhIjoiY21hZHZpb3Y0MDB3czJxcjZxNjMyNjV5ayJ9.Z5pVSBUcI3HDeALtF6YIiA';
-
-  const map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/satellite-v9',
-    projection: 'globe',
-    zoom: 1.5,
-    center: [39.271406, -7.046950],
-    pitch: 0,
-    bearing: 0
-  });
-
-  map.on('style.load', () => {
-    map.setFog({});
-  });
-
-  map.on('load', () => {
-    map.addSource('koppen', {
-      type: 'geojson',
-      data: './koppen.json'
-    });
-
-    map.addLayer({
-      id: 'koppen-layer',
-      type: 'fill',
-      source: 'koppen',
-      paint: {
-        'fill-color': ['get', 'fill'],
-        'fill-opacity': 0.5
-      }
-    });
-
-    document.getElementById('opacitySlider').addEventListener('input', (e) => {
-      map.setPaintProperty('koppen-layer', 'fill-opacity', parseFloat(e.target.value));
-    });
-
-    const pinCoords = [39.252324, -7.056898];
-
-    new mapboxgl.Marker({ color: '#FF0000' })
-      .setLngLat(pinCoords)
-      .setPopup(new mapboxgl.Popup().setHTML(`
-        <a href="https://passivehouseplus.co.uk/magazine/feature/tanzanian-children-s-eco-village-aims-to-inspire-low-carbon-example"
-           target="_blank" rel="noopener noreferrer"
-           style="text-decoration: none; color: inherit; font-family: 'Ubuntu', sans-serif;">
-          <strong>House 5</strong><br>
-          iHelp Eco Village, Mkuranga, Tanzania<br>
-          <span style="color: #62a7f2;">Tropical Savannah (Aw)</span><br>
-          <span style="font-style: italic; color: black;">Marked area is not exact.</span><br>
-          <img class="popup-image" src="https://passivehouseplus.co.uk/media/k2/items/cache/66a54350e94d9d93612885188af705a6_XL.jpg?t=20250108_163553" alt="House 5 Image" />
-        </a>
-      `))
-      .addTo(map);
-
-    function createGeoJSONCircle(center, radiusInKm, points = 64) {
-      const coords = {
-        latitude: center[1],
-        longitude: center[0]
-      };
-
-      const km = radiusInKm;
-      const ret = [];
-      const distanceX = km / (111.32 * Math.cos(coords.latitude * Math.PI / 180));
-      const distanceY = km / 110.574;
-
-      for (let i = 0; i < points; i++) {
-        const theta = (i / points) * (2 * Math.PI);
-        const x = distanceX * Math.cos(theta);
-        const y = distanceY * Math.sin(theta);
-        ret.push([coords.longitude + x, coords.latitude + y]);
-      }
-      ret.push(ret[0]);
-
-      return {
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: [ret]
-        }
-      };
-    }
-
-    const circleGeoJSON = createGeoJSONCircle(pinCoords, 5);
-
-    map.addSource('circle', {
-      type: 'geojson',
-      data: circleGeoJSON
-    });
-
-    map.addLayer({
-      id: 'circle-layer',
-      type: 'fill',
-      source: 'circle',
-      paint: {
-        'fill-color': '#FF0000',
-        'fill-opacity': 0.15
-      }
-    });
-
-    map.addLayer({
-      id: 'circle-outline',
-      type: 'line',
-      source: 'circle',
-      paint: {
-        'line-color': '#FF0000',
-        'line-width': 1
-      }
-    });
-
-    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
-  });
-
-  document.getElementById('toggleOpacity').addEventListener('click', () => {
-    const opacityControls = document.getElementById('opacityControls');
-    opacityControls.style.display = opacityControls.style.display === 'none' ? 'block' : 'none';
-  });
-
-  document.getElementById('toggleLegend').addEventListener('click', () => {
-    const legendContainer = document.getElementById('legendContainer');
-    legendContainer.style.display = legendContainer.style.display === 'none' ? 'block' : 'none';
-  });
-</script>
-</body>
-</html>
