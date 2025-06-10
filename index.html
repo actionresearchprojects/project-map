@@ -155,27 +155,35 @@
         map.setPaintProperty('koppen-layer', 'fill-opacity', parseFloat(e.target.value));
       });
 
-      // Dynamic pins
-      fetch('pins.json')
-        .then(res => res.json())
-        .then(points => {
-          points.forEach(pt => {
-            const coords = pt.gdpr
-              ? generateMaskedCoords(pt.latitude, pt.longitude, pt.radiusKm)
-              : [pt.longitude, pt.latitude];
+fetch('pins.json')
+  .then(res => res.json())
+  .then(points => {
+    points.forEach(pt => {
+      const coords = [pt.longitude, pt.latitude];  // Always use provided coords
 
-            new mapboxgl.Marker({ color: pt.colour })
-              .setLngLat(coords)
-              .setPopup(new mapboxgl.Popup().setHTML(
-                `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">` +
-                  `<strong>${pt.title}</strong><br>` +
-                  `${pt.address}<br>` +
-                  `<span style="color:${pt.zoneColour};">${pt.zoneText}</span><br>` +
-                  `${pt.gdpr ? '<em>Marked area is not exact.</em><br>' : ''}` +
-                  `<img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" />` +
-                `</a>`
-              ))
-              .addTo(map);
+      new mapboxgl.Marker({ color: pt.colour })
+        .setLngLat(coords)
+        .setPopup(new mapboxgl.Popup().setHTML(
+          `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">` +
+            `<strong>${pt.title}</strong><br>` +
+            `${pt.address}<br>` +
+            `<span style="color:${pt.zoneColour};">${pt.zoneText}</span><br>` +
+            `${pt.gdpr ? '<em>Marked area is not exact.</em><br>' : ''}` +
+            `<img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" />` +
+          `</a>`
+        ))
+        .addTo(map);
+
+      if (pt.gdpr) {
+        const circle = createGeoJSONCircle(coords, pt.radiusKm);
+        const id = `circle-${pt.id}`;
+        map.addSource(id, { type: 'geojson', data: circle });
+        map.addLayer({ id: `${id}-fill`, type: 'fill', source: id, paint: { 'fill-color': pt.colour, 'fill-opacity': 0.15 } });
+        map.addLayer({ id: `${id}-line`, type: 'line', source: id, paint: { 'line-color': pt.colour, 'line-width': 1 } });
+      }
+    });
+  });
+
 
             if (pt.gdpr) {
               const circle = createGeoJSONCircle(coords, pt.radiusKm);
