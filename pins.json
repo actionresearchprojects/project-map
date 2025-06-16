@@ -1,31 +1,20 @@
 [
-  {
-    "id": "house5",
-    "title": "House 5",
-    "link": "https://passivehouseplus.co.uk/magazine/feature/tanzanian-children-s-eco-village-aims-to-inspire-low-carbon-example",
-    "address": "iHelp Eco Village, Mkuranga, Tanzania",
-    "zones": [
-      {
-        "code": "BSk",
-        "text": "Cold Steppe (BSk)",
-        "colour": "#ffdc64"
-      },
-      {
-        "code": "Dwc",
-        "text": "Subarctic (dry winter, cold summer) (Dwc)",
-        "colour": "#4b50b4"
-      },
-      {
-        "code": "Dwa",
-        "text": "Humid Continental (dry winter, hot summer) (Dwa)",
-        "colour": "#aaafff"
-      }
-    ],
-    "latitude": -7.056898,
-    "longitude": 39.252324,
-    "gdpr": true,
-    "radiusKm": 5,
-    "imageUrl": "https://passivehouseplus.co.uk/media/k2/items/cache/66a54350e94d9d93612885188af705a6_XL.jpg?t=20250108_163553",
-    "colour": "#FF0000"
-  }
+{
+  "id": "House 5",
+  "title": "House 5",
+  "link": "https://passivehouseplus.co.uk/magazine/feature/tanzanian-children-s-eco-village-aims-to-inspire-low-carbon-example",
+  "address": "iHelp Eco Village, Mkuranga, Tanzania",
+  "zones": [
+    {
+      "code": "Aw",
+      "text": "Tropical savanna climate (Aw)",
+      "colour": "#45aafa"
+    }
+  ],
+  "latitude": -7.06593775347451,
+  "longitude": 39.292309128440536,
+  "gdpr": true,
+  "radiusKm": 5,
+  "colour": "#FFFFFF"
+}
 ]
