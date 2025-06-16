@@ -149,26 +149,26 @@
           points.forEach(pt => {
             const coords = [pt.longitude, pt.latitude];
 
+            // Handle zone text for old and new format
+            let zoneLines = "";
+            if (pt.zones && Array.isArray(pt.zones)) {
+              zoneLines = pt.zones.map(z => `<span style="color:${z.colour};">${z.text}</span>`).join('<br>');
+            } else if (pt.zoneText && pt.zoneColour) {
+              zoneLines = `<span style="color:${pt.zoneColour};">${pt.zoneText}</span>`;
+            }
+
+            const popupHtml =
+              `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">` +
+                `<strong>${pt.title}</strong><br>` +
+                `${pt.address}<br>` +
+                `${zoneLines}<br>` +
+                `${pt.gdpr ? '<em>Marked area is not exact.</em><br>' : ''}` +
+                `<img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" />` +
+              `</a>`;
+
             new mapboxgl.Marker({ color: pt.colour })
               .setLngLat(coords)
-              .setPopup(new mapboxgl.Popup().setHTML(() => {
-                let zoneLines = "";
-                if (pt.zones && Array.isArray(pt.zones)) {
-                  zoneLines = pt.zones.map(z => `<span style="color:${z.colour};">${z.text}</span>`).join('<br>');
-                } else if (pt.zoneText && pt.zoneColour) {
-                  zoneLines = `<span style="color:${pt.zoneColour};">${pt.zoneText}</span>`;
-                }
-
-                return (
-                  `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">` +
-                    `<strong>${pt.title}</strong><br>` +
-                    `${pt.address}<br>` +
-                    `${zoneLines}<br>` +
-                    `${pt.gdpr ? '<em>Marked area is not exact.</em><br>' : ''}` +
-                    `<img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" />` +
-                  `</a>`
-                );
-              }))
+              .setPopup(new mapboxgl.Popup().setHTML(popupHtml))
               .addTo(map);
 
             if (pt.gdpr) {
