@@ -62,10 +62,12 @@
     #opacitySlider { width: 100%; }
 
     #legendContainer img {
-      width: 100%;
-      height: auto;
-      max-height: 300px;
+      height: 30vh;
+      width: auto;
+      max-width: 100%;
       object-fit: contain;
+      display: block;
+      margin: 0 auto;
     }
 
     .popup-image {
@@ -84,7 +86,6 @@
         font-size: 14px;
         padding: 4px 0;
       }
-      #legendContainer img { max-height: 150px; }
     }
   </style>
 </head>
@@ -149,7 +150,6 @@
           points.forEach(pt => {
             const coords = [pt.longitude, pt.latitude];
 
-            // Handle zone text for old and new format
             let zoneLines = "";
             if (pt.zones && Array.isArray(pt.zones)) {
               zoneLines = pt.zones.map(z => `<span style="color:${z.colour};">${z.text}</span>`).join('<br>');
