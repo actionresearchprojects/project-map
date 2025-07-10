@@ -18,5 +18,25 @@
   "gdpr": true,
   "imageUrl": "https://passivehouseplus.co.uk/media/k2/items/cache/66a54350e94d9d93612885188af705a6_XL.jpg?t=20250108_163553",
   "colour": "#006400"
+},
+{
+  "id": "cevtestunit",
+  "type": "Project",
+  "title": "Experimental Test Unit at Children's Ecovillage",
+  "link": "https://passivehouseplus.co.uk/magazine/feature/tanzanian-children-s-eco-village-aims-to-inspire-low-carbon-example ",
+  "address": "Ecovillage, Mkuranga, Tanzania",
+  "zones": [
+    {
+      "code": "Aw",
+      "text": "Tropical savanna (Aw)",
+      "colour": "#45aafa"
+    }
+  ],
+  "latitude": -7.046407798284167,
+  "longitude": 39.272655774084285,
+  "radiusKm": 5,
+  "gdpr": true,
+  "imageUrl": "https://i.imgur.com/19LgVCi.jpeg",
+  "colour": "#006400"
 }
 ]
