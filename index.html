@@ -108,11 +108,11 @@
     function createGeoJSONCircle(center, radiusKm, points = 64) {
       const lat = center[1], lon = center[0];
       const coords = [];
-      const dX = radiusKm / (111.32 * Math.cos(lat * Math.PI/180));
+      const dX = radiusKm / (111.32 * Math.cos(lat * Math.PI / 180));
       const dY = radiusKm / 110.574;
       for (let i = 0; i < points; i++) {
         const θ = 2 * Math.PI * i / points;
-        coords.push([ lon + dX * Math.cos(θ), lat + dY * Math.sin(θ) ]);
+        coords.push([lon + dX * Math.cos(θ), lat + dY * Math.sin(θ)]);
       }
       coords.push(coords[0]);
       return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] } };
@@ -159,11 +159,11 @@
 
             const popupHtml =
               `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">` +
-                `<div style="font-weight: 900; font-family: Ubuntu, sans-serif; font-size: 18px; line-height: 1.2; display: block; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${pt.title}</div>` +
-                (pt.address ? `${pt.address}<br>` : '') +
-                `${zoneLines}<br>` +
-                (pt.gdpr ? '<em>Marked area is not exact.</em><br>' : '') +
-                (pt.imageUrl ? `<div style="text-align: center;"><img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" /></div>` : '') +
+              `<div style="font-weight: 900; font-family: Ubuntu, sans-serif; font-size: 18px; line-height: 1.2; display: block; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${pt.title}</div>` +
+              (pt.address ? `${pt.address}<br>` : '') +
+              `${zoneLines}<br>` +
+              (pt.gdpr ? '<em>Marked area is not exact.</em><br>' : '') +
+              (pt.imageUrl ? `<div style="text-align: center;"><img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" /></div>` : '') +
               `</a>`;
 
             const el = document.createElement('div');
@@ -185,23 +185,9 @@
               const circle = createGeoJSONCircle(coords, pt.radiusKm);
               const id = `circle-${pt.id}`;
               map.addSource(id, { type: 'geojson', data: circle });
-              map.addLayer({ id: `${id}-fill`, type: 'fill', source: id, paint: { 'fill-color': pt.colour, 'fill-opacity': 0.15 } });
-              map.addLayer({ id: `${id}-line`, type: 'line', source: id, paint: { 'line-color': pt.colour, 'line-width': 1 } });
-            }
-          });
-        });
-
-      map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
-    });
-
-    document.getElementById('toggleOpacity').addEventListener('click', () => {
-      const el = document.getElementById('opacityControls');
-      el.style.display = el.style.display === 'block' ? 'none' : 'block';
-    });
-    document.getElementById('toggleLegend').addEventListener('click', () => {
-      const el = document.getElementById('legendContainer');
-      el.style.display = el.style.display === 'block' ? 'none' : 'block';
-    });
-  </script>
-</body>
-</html>
+              map.addLayer({
+                id: `${id}-fill`,
+                type: 'fill',
+                source: id,
+                paint: {
+                  'fi
