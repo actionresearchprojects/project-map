@@ -159,7 +159,7 @@
 
             const popupHtml =
               `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">` +
-              `<div style="font-weight: 900; font-family: Ubuntu, sans-serif; line-height: 1.2; display: block; width: 100%; white-space: nowrap; text-align: center; font-size: clamp(12px, 2.5vw, 18px);">${pt.title}</div>` +
+              `<div style="font-weight: 900; font-family: Ubuntu, sans-serif; line-height: 1.2; text-align: center; white-space: nowrap; overflow: hidden; max-width: 100%; font-size: 2vw;">${pt.title}</div>` +
               (pt.address ? `${pt.address}<br>` : '') +
               `${zoneLines}<br>` +
               (pt.gdpr ? '<em>Marked area is not exact.</em><br>' : '') +
@@ -173,7 +173,7 @@
             el.style.alignItems = "flex-end";
             el.style.justifyContent = "center";
             el.innerHTML = `
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="34" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="56" viewBox="0 0 24 34" fill="none" stroke="black" stroke-width="1">
                 <path d="M12 2C8 2 5 5.5 5 9.5c0 5.4 7 12.5 7 12.5s7-7.1 7-12.5C19 5.5 16 2 12 2z" fill="white"/>
                 <circle cx="12" cy="9.5" r="2.5" fill="black"/>
               </svg>
