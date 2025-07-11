@@ -159,27 +159,14 @@
 
             const popupHtml =
               `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">` +
-              `<div style="font-weight: 900; font-family: Ubuntu, sans-serif; line-height: 1.2; text-align: center; white-space: nowrap; overflow: hidden; max-width: 100%; font-size: 2vw;">${pt.title}</div>` +
+              `<div style="font-weight: 700; font-family: Ubuntu, sans-serif; line-height: 1.3; text-align: center; font-size: 17px; margin-bottom: 4px;">${pt.title}</div>` +
               (pt.address ? `${pt.address}<br>` : '') +
               `${zoneLines}<br>` +
               (pt.gdpr ? '<em>Marked area is not exact.</em><br>' : '') +
               (pt.imageUrl ? `<div style="text-align: center;"><img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" /></div>` : '') +
               `</a>`;
 
-            const el = document.createElement('div');
-            el.style.width = "40px";
-            el.style.height = "56px";
-            el.style.display = "flex";
-            el.style.alignItems = "flex-end";
-            el.style.justifyContent = "center";
-            el.innerHTML = `
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="56" viewBox="0 0 24 34" fill="none" stroke="black" stroke-width="1">
-                <path d="M12 2C8 2 5 5.5 5 9.5c0 5.4 7 12.5 7 12.5s7-7.1 7-12.5C19 5.5 16 2 12 2z" fill="white"/>
-                <circle cx="12" cy="9.5" r="2.5" fill="black"/>
-              </svg>
-            `;
-
-            new mapboxgl.Marker(el, { anchor: 'bottom' })
+            new mapboxgl.Marker({ color: '#8de9eb' })
               .setLngLat(coords)
               .setPopup(new mapboxgl.Popup().setHTML(popupHtml))
               .addTo(map);
