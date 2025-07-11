@@ -163,7 +163,10 @@
               (pt.address ? `${pt.address}<br>` : '') +
               `${zoneLines}<br>` +
               (pt.gdpr ? '<em>Marked area is not exact.</em><br>' : '') +
-              (pt.imageUrl ? `<div style="text-align: center;"><img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" /></div>` : '') +
+              (pt.imageUrl ? `
+                <div style="text-align: center;">
+                  <img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" style="display: block; margin: 0 auto;" />
+                </div>` : '') +
               `</a>`;
 
             new mapboxgl.Marker({ color: '#8de9eb' })
