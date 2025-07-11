@@ -190,4 +190,35 @@
                 type: 'fill',
                 source: id,
                 paint: {
-                  'fi
+                  'fill-color': '#ffffff',
+                  'fill-opacity': 0.15
+                }
+              });
+              map.addLayer({
+                id: `${id}-line`,
+                type: 'line',
+                source: id,
+                paint: {
+                  'line-color': '#ffffff',
+                  'line-width': 1
+                }
+              });
+            }
+          });
+        });
+
+      map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
+    });
+
+    document.getElementById('toggleOpacity').addEventListener('click', () => {
+      const el = document.getElementById('opacityControls');
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    });
+
+    document.getElementById('toggleLegend').addEventListener('click', () => {
+      const el = document.getElementById('legendContainer');
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    });
+  </script>
+</body>
+</html>
