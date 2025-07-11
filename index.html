@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     html, body,
     #controlWrapper,
@@ -159,11 +159,11 @@
 
             const popupHtml =
               `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">` +
-                `<strong>${pt.title}</strong><br>` +
-                `${pt.address}<br>` +
+                `<div style="white-space: nowrap; font-size: clamp(14px, 2.8vw, 18px); font-weight: 900; overflow: hidden; text-overflow: ellipsis;">${pt.title}</div>` +
+                (pt.address ? `${pt.address}<br>` : '') +
                 `${zoneLines}<br>` +
-                `${pt.gdpr ? '<em>Marked area is not exact.</em><br>' : ''}` +
-                `<img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" />` +
+                (pt.gdpr ? '<em>Marked area is not exact.</em><br>' : '') +
+                (pt.imageUrl ? `<div style="text-align: center;"><img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" /></div>` : '') +
               `</a>`;
 
             new mapboxgl.Marker({ color: pt.colour })
