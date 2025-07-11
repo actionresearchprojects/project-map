@@ -166,7 +166,17 @@
                 (pt.imageUrl ? `<div style="text-align: center;"><img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" /></div>` : '') +
               `</a>`;
 
-            new mapboxgl.Marker({ color: pt.colour })
+            const el = document.createElement('div');
+            el.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.5">
+                <path d="M12 2C8 2 5 5.5 5 9.5c0 5.4 7 12.5 7 12.5s7-7.1 7-12.5C19 5.5 16 2 12 2z" fill="white"/>
+                <circle cx="12" cy="9.5" r="2.5" fill="black"/>
+              </svg>
+            `;
+            el.style.width = "30px";
+            el.style.height = "40px";
+
+            new mapboxgl.Marker(el)
               .setLngLat(coords)
               .setPopup(new mapboxgl.Popup().setHTML(popupHtml))
               .addTo(map);
