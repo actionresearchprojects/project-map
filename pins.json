@@ -40,7 +40,6 @@
   "colour": "#006400"
 },
 {
-  {
   "id": "deshhouses",
   "type": "Project",
   "title": "Desh Houses : Twin Passive Solar Courtyard Houses, Bangladesh",
@@ -59,6 +58,5 @@
   "gdpr": true,
   "imageUrl": "https://i.postimg.cc/vHywnPHy/2.jpg",
   "colour": "#006400"
-}  
 }
 ]
