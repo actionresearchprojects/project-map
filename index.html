@@ -77,6 +77,12 @@
       margin-top: 6px;
     }
 
+    /* Climate zone text with thin border */
+    .zone-text {
+      -webkit-text-stroke: 0.3px black;
+      text-shadow: 0 0 0.3px black;
+    }
+
     @media (max-width: 600px) {
       #controlWrapper {
         max-width: 200px;
@@ -152,9 +158,11 @@
 
             let zoneLines = "";
             if (pt.zones && Array.isArray(pt.zones)) {
-              zoneLines = pt.zones.map(z => `<span style="color:${z.colour};">${z.text}</span>`).join('<br>');
+              zoneLines = pt.zones.map(z => 
+                `<span class="zone-text" style="color:${z.colour};">${z.text}</span>`
+              ).join('<br>');
             } else if (pt.zoneText && pt.zoneColour) {
-              zoneLines = `<span style="color:${pt.zoneColour};">${pt.zoneText}</span>`;
+              zoneLines = `<span class="zone-text" style="color:${pt.zoneColour};">${pt.zoneText}</span>`;
             }
 
             const popupHtml =
