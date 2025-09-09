@@ -38,5 +38,27 @@
   "gdpr": true,
   "imageUrl": "https://i.imgur.com/19LgVCi.jpeg",
   "colour": "#006400"
+},
+{
+  {
+  "id": "deshhouses",
+  "type": "Project",
+  "title": "Desh Houses : Twin Passive Solar Courtyard Houses, Bangladesh",
+  "link": "https://actionresearchprojects.net/reflections/shely-begum-desh-houses",
+  "address": "",
+  "zones": [
+    {
+      "code": "Cwa",
+      "text": "Monsoon-influenced humid subtropical (Cwa)",
+      "colour": "#96ff96"
+    }
+  ],
+  "latitude": 24.58159168275369,
+  "longitude": 91.92809654585386,
+  "radiusKm": 5,
+  "gdpr": true,
+  "imageUrl": "https://i.postimg.cc/vHywnPHy/2.jpg",
+  "colour": "#006400"
+}  
 }
 ]
