@@ -77,16 +77,25 @@
       margin-top: 6px;
     }
 
-    /* Zone label chips */
-    .zone-chip {
+    /* Base style for zone labels */
+    .zone-text {
       line-height: 1.25;
-      border-radius: 3px;
-      padding: 0; /* default no padding if not bright */
       display: inline-block;
     }
-    .zone-chip.bright {
-      background: rgba(0,0,0,0.45); /* dark grey highlight */
-      padding: 0 3px;               /* minimal chip padding */
+
+    /* Stroke appears only when JS adds .stroke for bright colours */
+    .zone-text.stroke {
+      -webkit-text-stroke: 0.35px rgba(0,0,0,0.85);
+      /* Firefox fallback: subtle 8-direction shadow to mimic stroke */
+      text-shadow:
+        0.3px 0   0 rgba(0,0,0,0.85),
+       -0.3px 0   0 rgba(0,0,0,0.85),
+        0   0.3px 0 rgba(0,0,0,0.85),
+        0  -0.3px 0 rgba(0,0,0,0.85),
+        0.21px  0.21px 0 rgba(0,0,0,0.85),
+       -0.21px  0.21px 0 rgba(0,0,0,0.85),
+        0.21px -0.21px 0 rgba(0,0,0,0.85),
+       -0.21px -0.21px 0 rgba(0,0,0,0.85);
     }
 
     @media (max-width: 600px) {
@@ -117,7 +126,7 @@
   </div>
 
   <script>
-    // Perceived brightness (0..1) using ITU-R BT.601 luma approximation
+    // --- Colour brightness helpers ---
     function hexToRgb(hex) {
       if (!hex) return null;
       let c = hex.trim();
@@ -127,14 +136,15 @@
       const num = parseInt(c, 16);
       return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
     }
+    // Perceived brightness (0..1), BT.601 luma
     function brightnessFromHex(hex) {
       const rgb = hexToRgb(hex);
-      if (!rgb) return 0.5; // neutral fallback
+      if (!rgb) return 0.5;
       const { r, g, b } = rgb;
-      // Perceived brightness 0..1
       return ((r * 299) + (g * 587) + (b * 114)) / (255000);
     }
-    // Threshold above which we add a dark-grey highlight
+
+    // Stroke only for bright colours
     const BRIGHTNESS_THRESHOLD = 0.75;
 
     function createGeoJSONCircle(center, radiusKm, points = 64) {
@@ -186,12 +196,12 @@
             if (pt.zones && Array.isArray(pt.zones)) {
               zoneLines = pt.zones.map(z => {
                 const bright = brightnessFromHex(z.colour) >= BRIGHTNESS_THRESHOLD;
-                const cls = bright ? 'zone-chip bright' : 'zone-chip';
+                const cls = bright ? 'zone-text stroke' : 'zone-text';
                 return `<span class="${cls}" style="color:${z.colour};">${z.text}</span>`;
               }).join('<br>');
             } else if (pt.zoneText && pt.zoneColour) {
               const bright = brightnessFromHex(pt.zoneColour) >= BRIGHTNESS_THRESHOLD;
-              const cls = bright ? 'zone-chip bright' : 'zone-chip';
+              const cls = bright ? 'zone-text stroke' : 'zone-text';
               zoneLines = `<span class="${cls}" style="color:${pt.zoneColour};">${pt.zoneText}</span>`;
             }
 
