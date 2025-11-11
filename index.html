@@ -2,22 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Köppen-Geiger Globe with Labels</title>
+  <title>Köppen-Geiger Globe</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
-
-  <!-- Geocoder plugin -->
-  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.1/mapbox-gl-geocoder.min.js"></script>
-  <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.1/mapbox-gl-geocoder.css" rel="stylesheet" />
-
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700;900&display=swap" rel="stylesheet">
-
   <style>
-    html, body, #map, #controlWrapper, .toggle-button, #opacityControls, #legendContainer, input[type=range], .mapboxgl-ctrl, .mapboxgl-popup-content {
+    html, body,
+    #controlWrapper,
+    .toggle-button,
+    #opacityControls,
+    #legendContainer,
+    input[type=range],
+    .mapboxgl-ctrl,
+    .mapboxgl-popup-content {
       font-family: 'Ubuntu', sans-serif !important;
     }
+
+    .mapboxgl-popup-content a {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      width: 100%;
+      height: 100%;
+    }
+
     html, body { margin: 0; padding: 0; height: 100%; }
     #map { width: 100%; height: 100%; }
 
@@ -25,8 +34,7 @@
       position: absolute;
       top: 10px;
       left: 10px;
-      background: rgba(255,255,255,0.8);
-      backdrop-filter: blur(6px);
+      background: white;
       padding: 8px 12px;
       border-radius: 6px;
       box-shadow: 0 0 6px rgba(0,0,0,0.15);
@@ -46,18 +54,39 @@
     }
 
     #opacityControls,
-    #legendContainer { margin-top: 6px; display: none; }
+    #legendContainer {
+      margin-top: 6px;
+      display: none;
+    }
 
-    #opacitySlider, #referenceSlider { width: 100%; }
+    #opacitySlider { width: 100%; }
 
-    #legendContainer img { height: 40vh; width: auto; max-width: 100%; object-fit: contain; display: block; margin: 0 auto; }
+    #legendContainer img {
+      height: 40vh;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+    }
 
-    .popup-image { max-width: 100%; max-height: 150px; display: block; margin-top: 6px; }
+    .popup-image {
+      max-width: 100%;
+      max-height: 150px;
+      display: block;
+      margin-top: 6px;
+    }
 
-    .zone-text { line-height: 1.25; display: inline-block; }
+    /* Base style for zone labels */
+    .zone-text {
+      line-height: 1.25;
+      display: inline-block;
+    }
 
+    /* Stroke appears only when JS adds .stroke for bright colours */
     .zone-text.stroke {
       -webkit-text-stroke: 0.35px rgba(0,0,0,0.85);
+      /* Firefox fallback: subtle 8-direction shadow to mimic stroke */
       text-shadow:
         0.3px 0   0 rgba(0,0,0,0.85),
        -0.3px 0   0 rgba(0,0,0,0.85),
@@ -70,8 +99,14 @@
     }
 
     @media (max-width: 600px) {
-      #controlWrapper { max-width: 200px; padding: 6px 10px; }
-      .toggle-button { font-size: 14px; padding: 4px 0; }
+      #controlWrapper {
+        max-width: 200px;
+        padding: 6px 10px;
+      }
+      .toggle-button {
+        font-size: 14px;
+        padding: 4px 0;
+      }
     }
   </style>
 </head>
@@ -81,19 +116,17 @@
   <div id="controlWrapper">
     <button id="toggleOpacity" class="toggle-button">Show Climate Zones</button>
     <div id="opacityControls">
-      <label for="opacitySlider">Köppen overlay</label>
       <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" />
-      <label for="referenceSlider">Place/road overlay</label>
-      <input type="range" id="referenceSlider" min="0" max="1" step="0.05" value="0.6" />
     </div>
+
     <button id="toggleLegend" class="toggle-button">Show Legend</button>
     <div id="legendContainer">
-      <img src="./legend.jpg" alt="Köppen climate zones legend with colour-coded regions" />
+      <img src="./legend.jpg" alt="Climate Zones Legend" />
     </div>
   </div>
 
   <script>
-    // --- Brightness helpers ---
+    // --- Colour brightness helpers ---
     function hexToRgb(hex) {
       if (!hex) return null;
       let c = hex.trim();
@@ -103,12 +136,15 @@
       const num = parseInt(c, 16);
       return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
     }
+    // Perceived brightness (0..1), BT.601 luma
     function brightnessFromHex(hex) {
       const rgb = hexToRgb(hex);
       if (!rgb) return 0.5;
       const { r, g, b } = rgb;
       return ((r * 299) + (g * 587) + (b * 114)) / (255000);
     }
+
+    // Stroke only for bright colours
     const BRIGHTNESS_THRESHOLD = 0.75;
 
     function createGeoJSONCircle(center, radiusKm, points = 64) {
@@ -137,17 +173,7 @@
 
     map.on('style.load', () => map.setFog({}));
 
-    // --- Geocoder (search box) ---
-    const geocoder = new MapboxGeocoder({
-      accessToken: mapboxgl.accessToken,
-      mapboxgl: mapboxgl,
-      placeholder: 'Search for a place',
-      marker: false
-    });
-    map.addControl(geocoder, 'top-left');
-
     map.on('load', () => {
-      // --- Köppen layer ---
       map.addSource('koppen', { type: 'geojson', data: './koppen.json' });
       map.addLayer({
         id: 'koppen-layer',
@@ -156,54 +182,16 @@
         paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.5 }
       });
 
-      // --- Place labels overlay (Mapbox Streets) ---
-      map.addSource('labels', { type: 'vector', url: 'mapbox://mapbox.mapbox-streets-v8' });
-
-      // Place names
-      map.addLayer({
-        id: 'place-labels',
-        type: 'symbol',
-        source: 'labels',
-        'source-layer': 'place_label',
-        layout: {
-          'text-field': ['get', 'name_en'],
-          'text-font': ['Ubuntu Bold', 'Arial Unicode MS Bold'],
-          'text-size': 12
-        },
-        paint: {
-          'text-color': '#ffffff',
-          'text-halo-color': '#000000',
-          'text-halo-width': 1,
-          'text-opacity': 0.6
-        }
-      });
-
-      // Roads (optional)
-      map.addLayer({
-        id: 'road-lines',
-        type: 'line',
-        source: 'labels',
-        'source-layer': 'road',
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': '#ffffff', 'line-opacity': 0.3, 'line-width': 1 }
-      });
-
-      // --- Opacity sliders ---
       document.getElementById('opacitySlider').addEventListener('input', e => {
         map.setPaintProperty('koppen-layer', 'fill-opacity', parseFloat(e.target.value));
       });
-      document.getElementById('referenceSlider').addEventListener('input', e => {
-        const val = parseFloat(e.target.value);
-        map.setPaintProperty('place-labels', 'text-opacity', val);
-        map.setPaintProperty('road-lines', 'line-opacity', val * 0.5); // roads slightly fainter
-      });
 
-      // --- Pins ---
       fetch('pins.json')
         .then(res => res.json())
         .then(points => {
           points.forEach(pt => {
             const coords = [pt.longitude, pt.latitude];
+
             let zoneLines = "";
             if (pt.zones && Array.isArray(pt.zones)) {
               zoneLines = pt.zones.map(z => {
@@ -218,12 +206,15 @@
             }
 
             const popupHtml =
-              `<a href="${pt.link.trim()}" target="_blank" rel="noopener noreferrer">` +
+              `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">` +
               `<div style="font-weight:700; font-family: Ubuntu, sans-serif; line-height:1.3; text-align:center; font-size:17px; margin-bottom:4px;">${pt.title}</div>` +
               (pt.address ? `${pt.address}<br>` : '') +
               `${zoneLines}<br>` +
               (pt.gdpr ? '<em>Marked area is not exact.</em><br>' : '') +
-              (pt.imageUrl ? `<div style="text-align:center;"><img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" /></div>` : '') +
+              (pt.imageUrl ? `
+                <div style="text-align:center;">
+                  <img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" />
+                </div>` : '') +
               `</a>`;
 
             new mapboxgl.Marker({ color: '#FCF5E3' })
@@ -239,13 +230,19 @@
                 id: `${id}-fill`,
                 type: 'fill',
                 source: id,
-                paint: { 'fill-color': '#ffffff', 'fill-opacity': 0.15 }
+                paint: {
+                  'fill-color': '#ffffff',
+                  'fill-opacity': 0.15
+                }
               });
               map.addLayer({
                 id: `${id}-line`,
                 type: 'line',
                 source: id,
-                paint: { 'line-color': '#ffffff', 'line-width': 1 }
+                paint: {
+                  'line-color': '#ffffff',
+                  'line-width': 1
+                }
               });
             }
           });
@@ -254,7 +251,6 @@
       map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
     });
 
-    // --- UI toggles ---
     document.getElementById('toggleOpacity').addEventListener('click', () => {
       const el = document.getElementById('opacityControls');
       el.style.display = el.style.display === 'block' ? 'none' : 'block';
