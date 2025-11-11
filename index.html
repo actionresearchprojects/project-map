@@ -14,75 +14,49 @@
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700;900&display=swap" rel="stylesheet">
 
   <style>
-    html, body,
-    #controlWrapper,
-    .toggle-button,
-    #opacityControls,
-    #legendContainer,
-    input[type=range],
-    .mapboxgl-ctrl,
-    .mapboxgl-popup-content {
-      font-family: 'Ubuntu', sans-serif !important;
-    }
-
-    html, body { margin: 0; padding: 0; height: 100%; }
-    #map { width: 100%; height: 100%; }
+    html, body { margin:0; padding:0; height:100%; }
+    #map { width:100%; height:100%; }
 
     #controlWrapper {
-      position: absolute;
-      top: 80px;
-      left: 10px;
-      background: white;
-      padding: 8px 12px;
-      border-radius: 6px;
-      box-shadow: 0 0 6px rgba(0,0,0,0.15);
-      z-index: 1000;
-      max-width: 300px;
+      position:absolute;
+      top:60px;             /* sits just below the geocoder */
+      left:10px;
+      background:white;
+      padding:8px 12px;
+      border-radius:6px;
+      box-shadow:0 0 6px rgba(0,0,0,0.15);
+      z-index:2;
+      max-width:280px;
     }
 
     .toggle-button {
-      display: block;
-      cursor: pointer;
-      background: none;
-      border: none;
-      font-size: 18px;
-      width: fit-content;
-      text-align: left;
-      padding: 6px 0;
+      background:none;
+      border:none;
+      cursor:pointer;
+      font-family:'Ubuntu',sans-serif;
+      font-size:16px;
+      text-align:left;
+      padding:4px 0;
+      display:block;
+      width:100%;
     }
 
-    #opacityControls, #legendContainer {
-      margin-top: 6px;
-      display: none;
-    }
-
-    #opacitySlider { width: 100%; }
+    #opacityControls,#legendContainer { display:none; margin-top:6px; }
+    #opacitySlider { width:100%; }
 
     #legendContainer img {
-      height: 40vh;
-      width: auto;
-      max-width: 100%;
-      object-fit: contain;
-      display: block;
-      margin: 0 auto;
+      width:100%; max-height:40vh; object-fit:contain;
+      display:block; margin:0 auto;
     }
 
-    .popup-image {
-      max-width: 100%;
-      max-height: 150px;
-      display: block;
-      margin-top: 6px;
-    }
+    .popup-image { max-width:100%; max-height:150px; display:block; margin-top:6px; }
 
-    .zone-text { line-height: 1.25; display: inline-block; }
-
+    .zone-text { line-height:1.25; display:inline-block; }
     .zone-text.stroke {
-      -webkit-text-stroke: 0.35px rgba(0,0,0,0.85);
+      -webkit-text-stroke:0.35px rgba(0,0,0,0.85);
       text-shadow:
-        0.3px 0 0 rgba(0,0,0,0.85),
-       -0.3px 0 0 rgba(0,0,0,0.85),
-        0 0.3px 0 rgba(0,0,0,0.85),
-        0 -0.3px 0 rgba(0,0,0,0.85);
+        0.3px 0 0 rgba(0,0,0,0.85),-0.3px 0 0 rgba(0,0,0,0.85),
+        0 0.3px 0 rgba(0,0,0,0.85),0 -0.3px 0 rgba(0,0,0,0.85);
     }
   </style>
 </head>
@@ -92,135 +66,91 @@
   <div id="controlWrapper">
     <button id="toggleOpacity" class="toggle-button">Show Climate & Labels</button>
     <div id="opacityControls">
-      <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" />
+      <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5">
     </div>
 
     <button id="toggleLegend" class="toggle-button">Show Legend</button>
     <div id="legendContainer">
-      <img src="./legend.jpg" alt="Climate Zones Legend" />
+      <img src="./legend.jpg" alt="Legend">
     </div>
   </div>
 
   <script>
-    function hexToRgb(hex) {
-      if (!hex) return null;
-      let c = hex.trim();
-      if (c[0] === '#') c = c.slice(1);
-      if (c.length === 3) c = c.split('').map(ch => ch + ch).join('');
-      const num = parseInt(c, 16);
-      return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
-    }
+    function hexToRgb(hex){ if(!hex)return null; let c=hex.replace('#',''); if(c.length===3)c=c.split('').map(ch=>ch+ch).join(''); const n=parseInt(c,16); return{r:(n>>16)&255,g:(n>>8)&255,b:n&255}; }
+    function brightnessFromHex(hex){ const rgb=hexToRgb(hex); if(!rgb)return 0.5; const{r,g,b}=rgb; return((r*299)+(g*587)+(b*114))/255000; }
+    const BRIGHTNESS_THRESHOLD=0.75;
+    function createGeoJSONCircle(center,radiusKm,points=64){ const [lon,lat]=center; const coords=[]; const dX=radiusKm/(111.32*Math.cos(lat*Math.PI/180)); const dY=radiusKm/110.574; for(let i=0;i<points;i++){const θ=2*Math.PI*i/points; coords.push([lon+dX*Math.cos(θ),lat+dY*Math.sin(θ)]);} coords.push(coords[0]); return{type:'Feature',geometry:{type:'Polygon',coordinates:[coords]}};}
 
-    function brightnessFromHex(hex) {
-      const rgb = hexToRgb(hex);
-      if (!rgb) return 0.5;
-      const { r, g, b } = rgb;
-      return ((r * 299) + (g * 587) + (b * 114)) / 255000;
-    }
-
-    const BRIGHTNESS_THRESHOLD = 0.75;
-
-    function createGeoJSONCircle(center, radiusKm, points = 64) {
-      const lat = center[1], lon = center[0];
-      const coords = [];
-      const dX = radiusKm / (111.32 * Math.cos(lat * Math.PI / 180));
-      const dY = radiusKm / 110.574;
-      for (let i = 0; i < points; i++) {
-        const θ = 2 * Math.PI * i / points;
-        coords.push([lon + dX * Math.cos(θ), lat + dY * Math.sin(θ)]);
-      }
-      coords.push(coords[0]);
-      return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] } };
-    }
-
-    mapboxgl.accessToken = 'pk.eyJ1IjoiYXJjaHdydGgiLCJhIjoiY21hZHZpb3Y0MDB3czJxcjZxNjMyNjV5ayJ9.Z5pVSBUcI3HDeALtF6YIiA';
-    const map = new mapboxgl.Map({
-      container: 'map',
-      style: 'mapbox://styles/mapbox/satellite-streets-v12',
-      projection: 'globe',
-      zoom: 1.5,
-      center: [39.271406, -7.046950],
-      pitch: 0,
-      bearing: 0
+    mapboxgl.accessToken='pk.eyJ1IjoiYXJjaHdydGgiLCJhIjoiY21hZHZpb3Y0MDB3czJxcjZxNjMyNjV5ayJ9.Z5pVSBUcI3HDeALtF6YIiA';
+    const map=new mapboxgl.Map({
+      container:'map',
+      style:'mapbox://styles/mapbox/satellite-streets-v12',
+      projection:'globe',
+      zoom:1.5, center:[39.27,-7.05]
     });
 
-    map.on('style.load', () => map.setFog({}));
+    map.on('style.load',()=>map.setFog({}));
 
-    map.on('load', () => {
-      // Add Köppen polygons
-      map.addSource('koppen', { type: 'geojson', data: './koppen.json' });
-      map.addLayer({
-        id: 'koppen-layer',
-        type: 'fill',
-        source: 'koppen',
-        paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.5 }
-      });
+    map.on('load',()=>{
+      // add koppen overlay
+      map.addSource('koppen',{type:'geojson',data:'./koppen.json'});
+      map.addLayer({id:'koppen-layer',type:'fill',source:'koppen',paint:{'fill-color':['get','fill'],'fill-opacity':0.5}});
 
-      // Navigation and geocoder
-      map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
-      const geocoder = new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken,
-        mapboxgl,
-        marker: false,
-        placeholder: 'Search for a place'
-      });
-      map.addControl(geocoder, 'top-left');
+      // navigation + geocoder
+      map.addControl(new mapboxgl.NavigationControl({showCompass:false}),'top-right');
+      const geocoder=new MapboxGeocoder({accessToken:mapboxgl.accessToken,mapboxgl,marker:false,placeholder:'Search place'});
+      map.addControl(geocoder,'top-left');
 
-      // Add pins
-      fetch('pins.json')
-        .then(r => r.json())
-        .then(points => {
-          points.forEach(pt => {
-            const coords = [pt.longitude, pt.latitude];
-            const bright = brightnessFromHex(pt.zones?.[0]?.colour) >= BRIGHTNESS_THRESHOLD;
-            const cls = bright ? 'zone-text stroke' : 'zone-text';
-            const zoneLine = `<span class="${cls}" style="color:${pt.zones?.[0]?.colour};">${pt.zones?.[0]?.text}</span>`;
-            const popupHtml = `
-              <a href="${pt.link}" target="_blank" rel="noopener noreferrer">
-                <div style="font-weight:700;text-align:center;font-size:17px;margin-bottom:4px;">${pt.title}</div>
-                ${pt.address || ''}<br>${zoneLine}<br>
-                ${pt.gdpr ? '<em>Marked area is not exact.</em><br>' : ''}
-                ${pt.imageUrl ? `<div style="text-align:center;"><img class="popup-image" src="${pt.imageUrl}" /></div>` : ''}
-              </a>`;
-            new mapboxgl.Marker({ color: '#FCF5E3' })
-              .setLngLat(coords)
-              .setPopup(new mapboxgl.Popup().setHTML(popupHtml))
-              .addTo(map);
-            if (pt.gdpr) {
-              const circle = createGeoJSONCircle(coords, pt.radiusKm);
-              const id = `circle-${pt.id}`;
-              map.addSource(id, { type: 'geojson', data: circle });
-              map.addLayer({ id: `${id}-fill`, type: 'fill', source: id, paint: { 'fill-color': '#fff', 'fill-opacity': 0.15 } });
-              map.addLayer({ id: `${id}-line`, type: 'line', source: id, paint: { 'line-color': '#fff', 'line-width': 1 } });
-            }
-          });
+      // pins
+      fetch('pins.json').then(r=>r.json()).then(points=>{
+        points.forEach(pt=>{
+          const coords=[pt.longitude,pt.latitude];
+          const bright=brightnessFromHex(pt.zones?.[0]?.colour)>=BRIGHTNESS_THRESHOLD;
+          const cls=bright?'zone-text stroke':'zone-text';
+          const zone=`<span class="${cls}" style="color:${pt.zones?.[0]?.colour};">${pt.zones?.[0]?.text}</span>`;
+          const popup=`
+            <a href="${pt.link}" target="_blank" rel="noopener noreferrer">
+              <div style="font-weight:700;text-align:center;font-size:17px;margin-bottom:4px;">${pt.title}</div>
+              ${pt.address||''}<br>${zone}<br>
+              ${pt.gdpr?'<em>Marked area not exact.</em><br>':''}
+              ${pt.imageUrl?`<div style="text-align:center;"><img class="popup-image" src="${pt.imageUrl}"></div>`:''}
+            </a>`;
+          new mapboxgl.Marker({color:'#FCF5E3'})
+            .setLngLat(coords)
+            .setPopup(new mapboxgl.Popup().setHTML(popup))
+            .addTo(map);
+
+          if(pt.gdpr){
+            const id=`circle-${pt.id}`;
+            const circle=createGeoJSONCircle(coords,pt.radiusKm);
+            map.addSource(id,{type:'geojson',data:circle});
+            map.addLayer({id:`${id}-fill`,type:'fill',source:id,paint:{'fill-color':'#fff','fill-opacity':0.15}});
+            map.addLayer({id:`${id}-line`,type:'line',source:id,paint:{'line-color':'#fff','line-width':1}});
+          }
         });
+      });
 
-      // Label layers after everything is loaded
-      const labelLayerIds = map.getStyle().layers
-        .filter(l => l.type === 'symbol' && l.layout?.['text-field'])
-        .map(l => l.id);
-
-      const slider = document.getElementById('opacitySlider');
-      function setOpacity(val) {
-        const v = parseFloat(val);
-        if (map.getLayer('koppen-layer'))
-          map.setPaintProperty('koppen-layer', 'fill-opacity', v);
-        labelLayerIds.forEach(id => map.setPaintProperty(id, 'symbol-opacity', v));
-      }
-      slider.addEventListener('input', e => setOpacity(e.target.value));
+      // gather label layers
+      const labelIds=map.getStyle().layers.filter(l=>l.type==='symbol'&&l.layout?.['text-field']).map(l=>l.id);
+      const slider=document.getElementById('opacitySlider');
+      const setOpacity=v=>{
+        const val=parseFloat(v);
+        if(map.getLayer('koppen-layer')) map.setPaintProperty('koppen-layer','fill-opacity',val);
+        labelIds.forEach(id=>{ if(map.getLayer(id)) map.setPaintProperty(id,'symbol-opacity',val); });
+      };
+      slider.addEventListener('input',e=>setOpacity(e.target.value));
       setOpacity(slider.value);
     });
 
-    document.getElementById('toggleOpacity').addEventListener('click', () => {
-      const el = document.getElementById('opacityControls');
-      el.style.display = el.style.display === 'block' ? 'none' : 'block';
-    });
-
-    document.getElementById('toggleLegend').addEventListener('click', () => {
-      const el = document.getElementById('legendContainer');
-      el.style.display = el.style.display === 'block' ? 'none' : 'block';
-    });
+    // button toggles
+    document.getElementById('toggleOpacity').onclick=()=>{
+      const c=document.getElementById('opacityControls');
+      c.style.display=c.style.display==='block'?'none':'block';
+    };
+    document.getElementById('toggleLegend').onclick=()=>{
+      const c=document.getElementById('legendContainer');
+      c.style.display=c.style.display==='block'?'none':'block';
+    };
   </script>
 </body>
 </html>
