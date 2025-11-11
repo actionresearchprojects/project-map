@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Köppen-Geiger Globe</title>
+  <title>Köppen-Geiger Globe with Labels</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
@@ -15,17 +15,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700;900&display=swap" rel="stylesheet">
 
   <style>
-    html, body,
-    #controlWrapper,
-    .toggle-button,
-    #opacityControls,
-    #legendContainer,
-    input[type=range],
-    .mapboxgl-ctrl,
-    .mapboxgl-popup-content {
+    html, body, #map, #controlWrapper, .toggle-button, #opacityControls, #legendContainer, input[type=range], .mapboxgl-ctrl, .mapboxgl-popup-content {
       font-family: 'Ubuntu', sans-serif !important;
     }
-
     html, body { margin: 0; padding: 0; height: 100%; }
     #map { width: 100%; height: 100%; }
 
@@ -54,36 +46,15 @@
     }
 
     #opacityControls,
-    #legendContainer {
-      margin-top: 6px;
-      display: none;
-    }
+    #legendContainer { margin-top: 6px; display: none; }
 
-    #opacitySlider,
-    #referenceSlider {
-      width: 100%;
-    }
+    #opacitySlider, #referenceSlider { width: 100%; }
 
-    #legendContainer img {
-      height: 40vh;
-      width: auto;
-      max-width: 100%;
-      object-fit: contain;
-      display: block;
-      margin: 0 auto;
-    }
+    #legendContainer img { height: 40vh; width: auto; max-width: 100%; object-fit: contain; display: block; margin: 0 auto; }
 
-    .popup-image {
-      max-width: 100%;
-      max-height: 150px;
-      display: block;
-      margin-top: 6px;
-    }
+    .popup-image { max-width: 100%; max-height: 150px; display: block; margin-top: 6px; }
 
-    .zone-text {
-      line-height: 1.25;
-      display: inline-block;
-    }
+    .zone-text { line-height: 1.25; display: inline-block; }
 
     .zone-text.stroke {
       -webkit-text-stroke: 0.35px rgba(0,0,0,0.85);
@@ -99,18 +70,11 @@
     }
 
     @media (max-width: 600px) {
-      #controlWrapper {
-        max-width: 200px;
-        padding: 6px 10px;
-      }
-      .toggle-button {
-        font-size: 14px;
-        padding: 4px 0;
-      }
+      #controlWrapper { max-width: 200px; padding: 6px 10px; }
+      .toggle-button { font-size: 14px; padding: 4px 0; }
     }
   </style>
 </head>
-
 <body>
   <div id="map"></div>
 
@@ -119,10 +83,9 @@
     <div id="opacityControls">
       <label for="opacitySlider">Köppen overlay</label>
       <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" />
-      <label for="referenceSlider">Reference overlay</label>
+      <label for="referenceSlider">Place/road overlay</label>
       <input type="range" id="referenceSlider" min="0" max="1" step="0.05" value="0.6" />
     </div>
-
     <button id="toggleLegend" class="toggle-button">Show Legend</button>
     <div id="legendContainer">
       <img src="./legend.jpg" alt="Köppen climate zones legend with colour-coded regions" />
@@ -174,7 +137,7 @@
 
     map.on('style.load', () => map.setFog({}));
 
-    // Add geocoder search box
+    // --- Geocoder (search box) ---
     const geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken,
       mapboxgl: mapboxgl,
@@ -193,30 +156,49 @@
         paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.5 }
       });
 
-      // --- Reference overlay (roads & labels) ---
-      map.addSource('map-reference', {
-        type: 'raster',
-        tiles: [
-          'https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/{z}/{x}/{y}?access_token=' + mapboxgl.accessToken
-        ],
-        tileSize: 256
-      });
+      // --- Place labels overlay (Mapbox Streets) ---
+      map.addSource('labels', { type: 'vector', url: 'mapbox://mapbox.mapbox-streets-v8' });
+
+      // Place names
       map.addLayer({
-        id: 'reference-layer',
-        type: 'raster',
-        source: 'map-reference',
-        paint: { 'raster-opacity': 0.6 }
+        id: 'place-labels',
+        type: 'symbol',
+        source: 'labels',
+        'source-layer': 'place_label',
+        layout: {
+          'text-field': ['get', 'name_en'],
+          'text-font': ['Ubuntu Bold', 'Arial Unicode MS Bold'],
+          'text-size': 12
+        },
+        paint: {
+          'text-color': '#ffffff',
+          'text-halo-color': '#000000',
+          'text-halo-width': 1,
+          'text-opacity': 0.6
+        }
       });
 
-      // --- Opacity controls ---
+      // Roads (optional)
+      map.addLayer({
+        id: 'road-lines',
+        type: 'line',
+        source: 'labels',
+        'source-layer': 'road',
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#ffffff', 'line-opacity': 0.3, 'line-width': 1 }
+      });
+
+      // --- Opacity sliders ---
       document.getElementById('opacitySlider').addEventListener('input', e => {
         map.setPaintProperty('koppen-layer', 'fill-opacity', parseFloat(e.target.value));
       });
       document.getElementById('referenceSlider').addEventListener('input', e => {
-        map.setPaintProperty('reference-layer', 'raster-opacity', parseFloat(e.target.value));
+        const val = parseFloat(e.target.value);
+        map.setPaintProperty('place-labels', 'text-opacity', val);
+        map.setPaintProperty('road-lines', 'line-opacity', val * 0.5); // roads slightly fainter
       });
 
-      // --- Load points ---
+      // --- Pins ---
       fetch('pins.json')
         .then(res => res.json())
         .then(points => {
@@ -241,10 +223,7 @@
               (pt.address ? `${pt.address}<br>` : '') +
               `${zoneLines}<br>` +
               (pt.gdpr ? '<em>Marked area is not exact.</em><br>' : '') +
-              (pt.imageUrl ? `
-                <div style="text-align:center;">
-                  <img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" />
-                </div>` : '') +
+              (pt.imageUrl ? `<div style="text-align:center;"><img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" /></div>` : '') +
               `</a>`;
 
             new mapboxgl.Marker({ color: '#FCF5E3' })
