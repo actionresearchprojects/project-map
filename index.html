@@ -4,9 +4,16 @@
   <meta charset="utf-8" />
   <title>Köppen-Geiger Globe</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+
+  <!-- Geocoder plugin -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.1/mapbox-gl-geocoder.min.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.1/mapbox-gl-geocoder.css" rel="stylesheet" />
+
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700;900&display=swap" rel="stylesheet">
+
   <style>
     html, body,
     #controlWrapper,
@@ -19,14 +26,6 @@
       font-family: 'Ubuntu', sans-serif !important;
     }
 
-    .mapboxgl-popup-content a {
-      display: block;
-      text-decoration: none;
-      color: inherit;
-      width: 100%;
-      height: 100%;
-    }
-
     html, body { margin: 0; padding: 0; height: 100%; }
     #map { width: 100%; height: 100%; }
 
@@ -34,7 +33,8 @@
       position: absolute;
       top: 10px;
       left: 10px;
-      background: white;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(6px);
       padding: 8px 12px;
       border-radius: 6px;
       box-shadow: 0 0 6px rgba(0,0,0,0.15);
@@ -59,7 +59,10 @@
       display: none;
     }
 
-    #opacitySlider { width: 100%; }
+    #opacitySlider,
+    #referenceSlider {
+      width: 100%;
+    }
 
     #legendContainer img {
       height: 40vh;
@@ -77,16 +80,13 @@
       margin-top: 6px;
     }
 
-    /* Base style for zone labels */
     .zone-text {
       line-height: 1.25;
       display: inline-block;
     }
 
-    /* Stroke appears only when JS adds .stroke for bright colours */
     .zone-text.stroke {
       -webkit-text-stroke: 0.35px rgba(0,0,0,0.85);
-      /* Firefox fallback: subtle 8-direction shadow to mimic stroke */
       text-shadow:
         0.3px 0   0 rgba(0,0,0,0.85),
        -0.3px 0   0 rgba(0,0,0,0.85),
@@ -110,23 +110,27 @@
     }
   </style>
 </head>
+
 <body>
   <div id="map"></div>
 
   <div id="controlWrapper">
     <button id="toggleOpacity" class="toggle-button">Show Climate Zones</button>
     <div id="opacityControls">
+      <label for="opacitySlider">Köppen overlay</label>
       <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" />
+      <label for="referenceSlider">Reference overlay</label>
+      <input type="range" id="referenceSlider" min="0" max="1" step="0.05" value="0.6" />
     </div>
 
     <button id="toggleLegend" class="toggle-button">Show Legend</button>
     <div id="legendContainer">
-      <img src="./legend.jpg" alt="Climate Zones Legend" />
+      <img src="./legend.jpg" alt="Köppen climate zones legend with colour-coded regions" />
     </div>
   </div>
 
   <script>
-    // --- Colour brightness helpers ---
+    // --- Brightness helpers ---
     function hexToRgb(hex) {
       if (!hex) return null;
       let c = hex.trim();
@@ -136,15 +140,12 @@
       const num = parseInt(c, 16);
       return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
     }
-    // Perceived brightness (0..1), BT.601 luma
     function brightnessFromHex(hex) {
       const rgb = hexToRgb(hex);
       if (!rgb) return 0.5;
       const { r, g, b } = rgb;
       return ((r * 299) + (g * 587) + (b * 114)) / (255000);
     }
-
-    // Stroke only for bright colours
     const BRIGHTNESS_THRESHOLD = 0.75;
 
     function createGeoJSONCircle(center, radiusKm, points = 64) {
@@ -173,7 +174,17 @@
 
     map.on('style.load', () => map.setFog({}));
 
+    // Add geocoder search box
+    const geocoder = new MapboxGeocoder({
+      accessToken: mapboxgl.accessToken,
+      mapboxgl: mapboxgl,
+      placeholder: 'Search for a place',
+      marker: false
+    });
+    map.addControl(geocoder, 'top-left');
+
     map.on('load', () => {
+      // --- Köppen layer ---
       map.addSource('koppen', { type: 'geojson', data: './koppen.json' });
       map.addLayer({
         id: 'koppen-layer',
@@ -182,16 +193,35 @@
         paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.5 }
       });
 
+      // --- Reference overlay (roads & labels) ---
+      map.addSource('map-reference', {
+        type: 'raster',
+        tiles: [
+          'https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/{z}/{x}/{y}?access_token=' + mapboxgl.accessToken
+        ],
+        tileSize: 256
+      });
+      map.addLayer({
+        id: 'reference-layer',
+        type: 'raster',
+        source: 'map-reference',
+        paint: { 'raster-opacity': 0.6 }
+      });
+
+      // --- Opacity controls ---
       document.getElementById('opacitySlider').addEventListener('input', e => {
         map.setPaintProperty('koppen-layer', 'fill-opacity', parseFloat(e.target.value));
       });
+      document.getElementById('referenceSlider').addEventListener('input', e => {
+        map.setPaintProperty('reference-layer', 'raster-opacity', parseFloat(e.target.value));
+      });
 
+      // --- Load points ---
       fetch('pins.json')
         .then(res => res.json())
         .then(points => {
           points.forEach(pt => {
             const coords = [pt.longitude, pt.latitude];
-
             let zoneLines = "";
             if (pt.zones && Array.isArray(pt.zones)) {
               zoneLines = pt.zones.map(z => {
@@ -206,7 +236,7 @@
             }
 
             const popupHtml =
-              `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">` +
+              `<a href="${pt.link.trim()}" target="_blank" rel="noopener noreferrer">` +
               `<div style="font-weight:700; font-family: Ubuntu, sans-serif; line-height:1.3; text-align:center; font-size:17px; margin-bottom:4px;">${pt.title}</div>` +
               (pt.address ? `${pt.address}<br>` : '') +
               `${zoneLines}<br>` +
@@ -230,19 +260,13 @@
                 id: `${id}-fill`,
                 type: 'fill',
                 source: id,
-                paint: {
-                  'fill-color': '#ffffff',
-                  'fill-opacity': 0.15
-                }
+                paint: { 'fill-color': '#ffffff', 'fill-opacity': 0.15 }
               });
               map.addLayer({
                 id: `${id}-line`,
                 type: 'line',
                 source: id,
-                paint: {
-                  'line-color': '#ffffff',
-                  'line-width': 1
-                }
+                paint: { 'line-color': '#ffffff', 'line-width': 1 }
               });
             }
           });
@@ -251,6 +275,7 @@
       map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
     });
 
+    // --- UI toggles ---
     document.getElementById('toggleOpacity').addEventListener('click', () => {
       const el = document.getElementById('opacityControls');
       el.style.display = el.style.display === 'block' ? 'none' : 'block';
