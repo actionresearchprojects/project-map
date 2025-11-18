@@ -7,196 +7,309 @@
 
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
-
-  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.1/mapbox-gl-geocoder.min.js"></script>
-  <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.1/mapbox-gl-geocoder.css" rel="stylesheet" />
-
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700;900&display=swap" rel="stylesheet">
 
   <style>
-    html, body { margin:0; padding:0; height:100%; }
-    #map { width:100%; height:100%; }
+    html, body,
+    #controlWrapper,
+    .toggle-button,
+    #opacityControls,
+    #legendContainer,
+    input[type=range],
+    .mapboxgl-ctrl,
+    .mapboxgl-popup-content {
+      font-family: 'Ubuntu', sans-serif !important;
+    }
+
+    html, body { margin: 0; padding: 0; height: 100%; }
+    #map { width: 100%; height: 100%; }
 
     #controlWrapper {
-      position:absolute;
-      top:60px;
-      left:10px;
-      background:white;
-      padding:8px 12px;
-      border-radius:6px;
-      box-shadow:0 0 6px rgba(0,0,0,0.15);
-      z-index:10;
-      max-width:280px;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.15);
+      z-index: 1000;
+      max-width: 300px;
     }
 
     .toggle-button {
-      background:none;
-      border:none;
-      cursor:pointer;
-      font-family:'Ubuntu',sans-serif;
-      font-size:16px;
-      text-align:left;
-      padding:4px 0;
-      display:block;
-      width:100%;
+      display: block;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 18px;
+      width: fit-content;
+      text-align: left;
+      padding: 6px 0;
     }
 
-    #opacityControls,#legendContainer { display:none; margin-top:6px; }
-    #opacitySlider { width:100%; }
+    #opacityControls, #legendContainer {
+      margin-top: 6px;
+      display: none;
+    }
+
+    #opacitySlider { width: 100%; }
 
     #legendContainer img {
-      width:100%; max-height:40vh; object-fit:contain;
-      display:block; margin:0 auto;
+      height: 40vh;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
     }
 
-    .popup-image { max-width:100%; max-height:150px; display:block; margin-top:6px; }
+    .popup-image {
+      max-width: 100%;
+      max-height: 150px;
+      display: block;
+      margin-top: 6px;
+    }
 
-    .zone-text { line-height:1.25; display:inline-block; }
+    .zone-text {
+      line-height: 1.25;
+      display: inline-block;
+    }
+
     .zone-text.stroke {
-      -webkit-text-stroke:0.35px rgba(0,0,0,0.85);
+      -webkit-text-stroke: 0.35px rgba(0,0,0,0.85);
       text-shadow:
-        0.3px 0 0 rgba(0,0,0,0.85),-0.3px 0 0 rgba(0,0,0,0.85),
-        0 0.3px 0 rgba(0,0,0,0.85),0 -0.3px 0 rgba(0,0,0,0.85);
+        0.3px 0 0 rgba(0,0,0,0.85),
+       -0.3px 0 0 rgba(0,0,0,0.85),
+        0   0.3px 0 rgba(0,0,0,0.85),
+        0  -0.3px 0 rgba(0,0,0,0.85),
+        0.21px  0.21px 0 rgba(0,0,0,0.85),
+       -0.21px  0.21px 0 rgba(0,0,0,0.85),
+        0.21px -0.21px 0 rgba(0,0,0,0.85),
+       -0.21px -0.21px 0 rgba(0,0,0,0.85);
     }
+
+    /* added for search box */
+    #searchBox {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.15);
+      z-index: 2000;
+      width: 200px;
+    }
+
+    #searchInput {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      font-family: Ubuntu, sans-serif;
+    }
+
   </style>
 </head>
 <body>
   <div id="map"></div>
 
+  <!-- search box -->
+  <div id="searchBox">
+    <input id="searchInput" placeholder="Search place…">
+  </div>
+
   <div id="controlWrapper">
-    <button id="toggleOpacity" class="toggle-button">Show Climate & Labels</button>
+    <button id="toggleOpacity" class="toggle-button">Show Climate Zones</button>
     <div id="opacityControls">
-      <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5">
+      <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" />
     </div>
 
     <button id="toggleLegend" class="toggle-button">Show Legend</button>
     <div id="legendContainer">
-      <img id="legendImg" alt="Legend">
+      <img src="./legend.jpg" alt="Climate Zones Legend" />
     </div>
   </div>
 
   <script>
-    // --- Auto-detect correct base path for GitHub Pages ---
-    const BASE = window.location.pathname.replace(/index\.html$/, "").replace(/\/$/, "");
-
-    const pinsURL    = BASE + "/pins.json";
-    const koppenURL  = BASE + "/koppen.json";
-    const legendURL  = BASE + "/legend.jpg";
-
-    document.getElementById("legendImg").src = legendURL;
-
-    // --- Utility functions ---
-    function hexToRgb(hex){ if(!hex)return null; let c=hex.replace('#',''); if(c.length===3)c=c.split('').map(ch=>ch+ch).join(''); const n=parseInt(c,16); return{r:(n>>16)&255,g:(n>>8)&255,b:n&255}; }
-    function brightnessFromHex(hex){ const rgb=hexToRgb(hex); if(!rgb)return 0.5; const{r,g,b}=rgb; return((r*299)+(g*587)+(b*114))/255000; }
-    const BRIGHTNESS_THRESHOLD=0.75;
-
-    function createGeoJSONCircle(center,radiusKm,points=64){
-      const[lon,lat]=center; const coords=[];
-      const dX=radiusKm/(111.32*Math.cos(lat*Math.PI/180));
-      const dY=radiusKm/110.574;
-      for(let i=0;i<points;i++){const θ=2*Math.PI*i/points; coords.push([lon+dX*Math.cos(θ),lat+dY*Math.sin(θ)]);}
-      coords.push(coords[0]);
-      return{type:'Feature',geometry:{type:'Polygon',coordinates:[coords]}};
+    function hexToRgb(hex) {
+      if (!hex) return null;
+      let c = hex.trim();
+      if (c[0] === '#') c = c.slice(1);
+      if (c.length === 3) c = c.split('').map(ch => ch + ch).join('');
+      if (c.length !== 6 || /[^0-9a-f]/i.test(c)) return null;
+      const num = parseInt(c, 16);
+      return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
     }
 
-    mapboxgl.accessToken = "pk.eyJ1IjoiYXJjaHdydGgiLCJhIjoiY21hZHZpb3Y0MDB3czJxcjZxNjMyNjV5ayJ9.Z5pVSBUcI3HDeALtF6YIiA";
+    function brightnessFromHex(hex) {
+      const rgb = hexToRgb(hex);
+      if (!rgb) return 0.5;
+      const { r, g, b } = rgb;
+      return ((r * 299) + (g * 587) + (b * 114)) / (255000);
+    }
 
+    const BRIGHTNESS_THRESHOLD = 0.75;
+
+    function createGeoJSONCircle(center, radiusKm, points = 64) {
+      const lat = center[1], lon = center[0];
+      const coords = [];
+      const dX = radiusKm / (111.32 * Math.cos(lat * Math.PI / 180));
+      const dY = radiusKm / 110.574;
+      for (let i = 0; i < points; i++) {
+        const θ = 2 * Math.PI * i / points;
+        coords.push([lon + dX * Math.cos(θ), lat + dY * Math.sin(θ)]);
+      }
+      coords.push(coords[0]);
+      return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] } };
+    }
+
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYXJjaHdydGgiLCJhIjoiY21hZHZpb3Y0MDB3czJxcjZxNjMyNjV5ayJ9.Z5pVSBUcI3HDeALtF6YIiA';
     const map = new mapboxgl.Map({
       container: 'map',
-      style: 'mapbox://styles/mapbox/satellite-streets-v12',
+      style: 'mapbox://styles/mapbox/satellite-v9',
       projection: 'globe',
       zoom: 1.5,
-      center: [39.27,-7.05]
+      center: [39.271406, -7.046950]
     });
 
-    map.on("style.load", () => map.setFog({}));
+    map.on('style.load', () => map.setFog({}));
 
-    map.on("load", async () => {
+    // SEARCH FUNCTION (Mapbox REST API)
+    async function searchPlace(query) {
+      const url = "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
+        encodeURIComponent(query) +
+        ".json?access_token=" + mapboxgl.accessToken;
 
-      // --- Köppen Layer ---
-      map.addSource("koppen", { type: "geojson", data: koppenURL });
+      const r = await fetch(url);
+      const j = await r.json();
+      if (!j.features || j.features.length === 0) return;
+
+      const [lon, lat] = j.features[0].center;
+      map.flyTo({ center: [lon, lat], zoom: 6 });
+
+      if (window._searchMarker) window._searchMarker.remove();
+      window._searchMarker = new mapboxgl.Marker({ color: "#ffcc00" })
+        .setLngLat([lon, lat])
+        .addTo(map);
+    }
+
+    document.getElementById("searchInput")
+      .addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+          searchPlace(e.target.value.trim());
+        }
+      });
+
+    map.on('load', () => {
+
+      // KOPPEN LAYER
+      map.addSource('koppen', { type: 'geojson', data: './koppen.json' });
       map.addLayer({
-        id: "koppen-layer",
-        type: "fill",
-        source: "koppen",
-        paint: {
-          "fill-color": ["get", "fill"],
-          "fill-opacity": 0.5
-        }
+        id: 'koppen-layer',
+        type: 'fill',
+        source: 'koppen',
+        paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.5 }
       });
 
-      // --- Nav + Search ---
-      map.addControl(new mapboxgl.NavigationControl({ showCompass:false }), "top-right");
-      map.addControl(new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken,
-        mapboxgl,
-        marker: false
-      }), "top-left");
+      // OPACITY SLIDER (now also controls label layers)
+      const slider = document.getElementById('opacitySlider');
 
-      // --- Pins ---
-      const points = await fetch(pinsURL).then(r => r.json());
-      points.forEach(pt => {
-        const coords=[pt.longitude,pt.latitude];
-        const bright=brightnessFromHex(pt.zones?.[0]?.colour)>=BRIGHTNESS_THRESHOLD;
-        const cls=bright?'zone-text stroke':'zone-text';
+      // gather symbol layers (place names)
+      const symbolLayers = map.getStyle().layers
+        .filter(l => l.type === 'symbol')
+        .map(l => l.id);
 
-        const zone = `<span class="${cls}" style="color:${pt.zones[0].colour};">${pt.zones[0].text}</span>`;
+      slider.addEventListener('input', e => {
+        const v = parseFloat(e.target.value);
 
-        const popupHtml = `
-          <a href="${pt.link}" target="_blank" rel="noopener noreferrer">
-            <div style="font-weight:700;text-align:center;font-size:17px;margin-bottom:4px;">${pt.title}</div>
-            ${pt.address||""}<br>${zone}<br>
-            ${pt.gdpr?'<em>Marked area not exact.</em><br>':''}
-            ${pt.imageUrl?`<div style="text-align:center;"><img class="popup-image" src="${pt.imageUrl}"></div>`:''}
-          </a>`;
+        // koppen opacity
+        map.setPaintProperty('koppen-layer', 'fill-opacity', v);
 
-        new mapboxgl.Marker({color:"#FCF5E3"})
-          .setLngLat(coords)
-          .setPopup(new mapboxgl.Popup().setHTML(popupHtml))
-          .addTo(map);
-
-        if(pt.gdpr){
-          const id=`circle-${pt.id}`;
-          const circle=createGeoJSONCircle(coords,pt.radiusKm);
-          map.addSource(id,{type:"geojson",data:circle});
-          map.addLayer({ id:`${id}-fill`, type:"fill", source:id, paint:{ "fill-color":"#fff", "fill-opacity":0.15 }});
-          map.addLayer({ id:`${id}-line`, type:"line", source:id, paint:{ "line-color":"#fff", "line-width":1 }});
-        }
+        // place label opacity (text + icons)
+        symbolLayers.forEach(id => {
+          if (map.getLayer(id)) {
+            if (map.getPaintProperty(id, "text-opacity") !== undefined)
+              map.setPaintProperty(id, "text-opacity", v);
+            if (map.getPaintProperty(id, "icon-opacity") !== undefined)
+              map.setPaintProperty(id, "icon-opacity", v);
+          }
+        });
       });
 
-      // --- Label Opacity Control ---
-      map.once("idle", () => {
-        const labelIds = map.getStyle().layers
-          .filter(l => l.type==="symbol" && l.layout?.["text-field"])
-          .map(l => l.id);
+      // PINS
+      fetch('pins.json')
+        .then(res => res.json())
+        .then(points => {
+          points.forEach(pt => {
+            const coords = [pt.longitude, pt.latitude];
 
-        const slider = document.getElementById("opacitySlider");
-        const setOpacity = val => {
-          const v=parseFloat(val);
-          if(map.getLayer("koppen-layer"))
-            map.setPaintProperty("koppen-layer","fill-opacity",v);
+            let zoneLines = "";
+            if (pt.zones && Array.isArray(pt.zones)) {
+              zoneLines = pt.zones.map(z => {
+                const bright = brightnessFromHex(z.colour) >= BRIGHTNESS_THRESHOLD;
+                const cls = bright ? 'zone-text stroke' : 'zone-text';
+                return `<span class="${cls}" style="color:${z.colour};">${z.text}</span>`;
+              }).join('<br>');
+            }
 
-          labelIds.forEach(id => {
-            if(map.getLayer(id))
-              map.setPaintProperty(id,"symbol-opacity",v);
+            const popupHtml =
+              `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">` +
+              `<div style="font-weight:700; line-height:1.3; text-align:center; font-size:17px; margin-bottom:4px;">${pt.title}</div>` +
+              `${pt.address ? pt.address + '<br>' : ''}` +
+              `${zoneLines}<br>` +
+              (pt.gdpr ? '<em>Marked area is not exact.</em><br>' : '') +
+              (pt.imageUrl ?
+                `<div style="text-align:center;"><img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" /></div>` :
+                '') +
+              `</a>`;
+
+            new mapboxgl.Marker({ color: '#FCF5E3' })
+              .setLngLat(coords)
+              .setPopup(new mapboxgl.Popup().setHTML(popupHtml))
+              .addTo(map);
+
+            if (pt.gdpr) {
+              const circle = createGeoJSONCircle(coords, pt.radiusKm);
+              const id = `circle-${pt.id}`;
+              map.addSource(id, { type: 'geojson', data: circle });
+              map.addLayer({
+                id: `${id}-fill`,
+                type: 'fill',
+                source: id,
+                paint: {
+                  'fill-color': '#ffffff',
+                  'fill-opacity': 0.15
+                }
+              });
+              map.addLayer({
+                id: `${id}-line`,
+                type: 'line',
+                source: id,
+                paint: {
+                  'line-color': '#ffffff',
+                  'line-width': 1
+                }
+              });
+            }
           });
-        };
+        });
 
-        slider.addEventListener("input",e => setOpacity(e.target.value));
-        setOpacity(slider.value);
-      });
+      map.addControl(
+        new mapboxgl.NavigationControl({ showCompass: false }),
+        'top-right'
+      );
     });
 
-    // UI
-    document.getElementById("toggleOpacity").onclick = () => {
-      const el = document.getElementById("opacityControls");
-      el.style.display = el.style.display==="block" ? "none" : "block";
-    };
-    document.getElementById("toggleLegend").onclick = () => {
-      const el = document.getElementById("legendContainer");
-      el.style.display = el.style.display==="block" ? "none" : "block";
-    };
-  </script>
+    document.getElementById('toggleOpacity').addEventListener('click', () => {
+      const el = document.getElementById('opacityControls');
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    });
 
+    document.getElementById('toggleLegend').addEventListener('click', () => {
+      const el = document.getElementById('legendContainer');
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    });
+  </script>
 </body>
 </html>
