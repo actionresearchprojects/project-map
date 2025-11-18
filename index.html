@@ -7,74 +7,66 @@
 
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
-
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700;900&display=swap" rel="stylesheet">
 
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
+    html, body,
+    #controlWrapper,
+    .toggle-button,
+    #opacityControls,
+    #legendContainer,
+    input[type=range],
+    .mapboxgl-ctrl,
+    .mapboxgl-popup-content {
       font-family: 'Ubuntu', sans-serif !important;
     }
 
-    #map {
+    .mapboxgl-popup-content a {
+      display: block;
+      text-decoration: none;
+      color: inherit;
       width: 100%;
       height: 100%;
     }
 
-    /* SEARCH BOX */
-    #searchBox {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      z-index: 3000;
-      background: white;
-      padding: 6px 12px;
-      border-radius: 6px;
-      box-shadow: 0 0 6px rgba(0,0,0,0.15);
-      width: 240px;
-    }
+    html, body { margin: 0; padding: 0; height: 100%; }
+    #map { width: 100%; height: 100%; }
 
-    #searchInput {
-      width: 100%;
-      border: none;
-      outline: none;
-      font-size: 14px;
-    }
-
-    /* MAIN CONTROL PANEL */
     #controlWrapper {
       position: absolute;
-      top: 65px;  /* sits BELOW search box */
-      right: 10px;
-      left: auto;
+      top: 10px;
+      left: 10px;
       background: white;
       padding: 8px 12px;
       border-radius: 6px;
       box-shadow: 0 0 6px rgba(0,0,0,0.15);
-      z-index: 2000;
-      max-width: 260px;
+      z-index: 1000;
+      max-width: 300px;
     }
 
     .toggle-button {
+      display: block;
+      cursor: pointer;
       background: none;
       border: none;
-      cursor: pointer;
-      font-size: 17px;
-      padding: 6px 0;
+      font-size: 18px;
+      width: fit-content;
       text-align: left;
-      width: 100%;
+      padding: 6px 0;
     }
 
-    #opacityControls, #legendContainer {
-      display: none;
+    #opacityControls,
+    #legendContainer {
       margin-top: 6px;
+      display: none;
     }
+
+    #opacitySlider { width: 100%; }
 
     #legendContainer img {
-      width: 100%;
-      max-height: 40vh;
+      height: 40vh;
+      width: auto;
+      max-width: 100%;
       object-fit: contain;
       display: block;
       margin: 0 auto;
@@ -87,233 +79,350 @@
       margin-top: 6px;
     }
 
-    .zone-text { line-height: 1.25; display: inline-block; }
+    .zone-text {
+      line-height: 1.25;
+      display: inline-block;
+    }
+
     .zone-text.stroke {
       -webkit-text-stroke: 0.35px rgba(0,0,0,0.85);
       text-shadow:
-        0.3px 0 0 rgba(0,0,0,0.85),
-       -0.3px 0 0 rgba(0,0,0,0.85),
-        0 0.3px 0 rgba(0,0,0,0.85),
-        0 -0.3px 0 rgba(0,0,0,0.85);
+        0.3px 0   0 rgba(0,0,0,0.85),
+       -0.3px 0   0 rgba(0,0,0,0.85),
+        0   0.3px 0 rgba(0,0,0,0.85),
+        0  -0.3px 0 rgba(0,0,0,0.85),
+        0.21px  0.21px 0 rgba(0,0,0,0.85),
+       -0.21px  0.21px 0 rgba(0,0,0,0.85),
+        0.21px -0.21px 0 rgba(0,0,0,0.85),
+       -0.21px -0.21px 0 rgba(0,0,0,0.85);
+    }
+
+    @media (max-width: 600px) {
+      #controlWrapper {
+        max-width: 200px;
+        padding: 6px 10px;
+      }
+      .toggle-button {
+        font-size: 14px;
+        padding: 4px 0;
+      }
+    }
+
+    /* Search UI */
+    #searchBox {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.15);
+      z-index: 1500;
+      width: 230px;
+    }
+
+    #searchInput {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      font-family: 'Ubuntu', sans-serif;
+    }
+
+    #searchSuggestions {
+      margin-top: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      border-radius: 4px;
+      box-shadow: 0 0 4px rgba(0,0,0,0.15);
+      background: white;
+      display: none;
+    }
+
+    .suggestion-item {
+      padding: 6px 8px;
+      cursor: pointer;
+      font-size: 13px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-item:hover {
+      background: #f2f2f2;
+    }
+
+    .suggestion-item.disabled {
+      cursor: default;
+      color: #999;
     }
   </style>
 </head>
-
 <body>
+  <div id="map"></div>
 
-<div id="map"></div>
+  <div id="searchBox">
+    <input id="searchInput" placeholder="Search place…" autocomplete="off">
+    <div id="searchSuggestions"></div>
+  </div>
 
-<!-- SEARCH BOX -->
-<div id="searchBox">
-  <input id="searchInput" placeholder="Search place…">
-</div>
-
-<!-- CONTROL PANEL -->
-<div id="controlWrapper">
-  <button id="toggleOpacity" class="toggle-button">Show Opacity Controls</button>
-
-  <div id="opacityControls">
-    <div style="margin-bottom:6px;">
-      <div style="font-size:14px;">Climate Layer</div>
-      <input type="range" id="koppenSlider" min="0" max="1" step="0.05" value="0.6">
+  <div id="controlWrapper">
+    <button id="toggleOpacity" class="toggle-button">Show Climate & Labels</button>
+    <div id="opacityControls">
+      <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.6" />
     </div>
 
-    <div>
-      <div style="font-size:14px;">Place Names & Labels</div>
-      <input type="range" id="labelSlider" min="0" max="1" step="0.05" value="1">
+    <button id="toggleLegend" class="toggle-button">Show Legend</button>
+    <div id="legendContainer">
+      <img src="./legend.jpg" alt="Climate Zones Legend" />
     </div>
   </div>
 
-  <button id="toggleLegend" class="toggle-button">Show Legend</button>
-  <div id="legendContainer">
-    <img src="./legend.jpg" alt="Climate Zones Legend">
-  </div>
-</div>
+  <script>
+    // --- Colour brightness helpers ---
+    function hexToRgb(hex) {
+      if (!hex) return null;
+      let c = hex.trim();
+      if (c[0] === '#') c = c.slice(1);
+      if (c.length === 3) c = c.split('').map(ch => ch + ch).join('');
+      if (c.length !== 6 || /[^0-9a-f]/i.test(c)) return null;
+      const num = parseInt(c, 16);
+      return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+    }
 
-<script>
-/* Helpers */
-function hexToRgb(hex) {
-  if (!hex) return null;
-  let c = hex.replace('#','');
-  if (c.length === 3) c = c.split('').map(x => x+x).join('');
-  const n = parseInt(c,16);
-  return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
-}
-function brightnessFromHex(hex) {
-  const rgb = hexToRgb(hex);
-  if (!rgb) return 0.5;
-  const {r,g,b} = rgb;
-  return ((r*299)+(g*587)+(b*114))/255000;
-}
-const BRIGHTNESS_THRESHOLD = 0.75;
+    function brightnessFromHex(hex) {
+      const rgb = hexToRgb(hex);
+      if (!rgb) return 0.5;
+      const { r, g, b } = rgb;
+      return ((r * 299) + (g * 587) + (b * 114)) / (255000);
+    }
 
-function createGeoJSONCircle(center, radiusKm, points = 64) {
-  const [lon, lat] = center;
-  const coords = [];
-  const dX = radiusKm / (111.32 * Math.cos(lat * Math.PI/180));
-  const dY = radiusKm / 110.574;
-  for (let i = 0; i < points; i++) {
-    const t = 2 * Math.PI * i / points;
-    coords.push([lon + dX * Math.cos(t), lat + dY * Math.sin(t)]);
-  }
-  coords.push(coords[0]);
-  return { type:'Feature', geometry:{ type:'Polygon', coordinates:[coords] }};
-}
+    const BRIGHTNESS_THRESHOLD = 0.75;
 
-/* Map init */
-mapboxgl.accessToken =
-  'pk.eyJ1IjoiYXJjaHdydGgiLCJhIjoiY21hZHZpb3Y0MDB3czJxcjZxNjMyNjV5ayJ9.Z5pVSBUcI3HDeALtF6YIiA';
+    function createGeoJSONCircle(center, radiusKm, points = 64) {
+      const lat = center[1], lon = center[0];
+      const coords = [];
+      const dX = radiusKm / (111.32 * Math.cos(lat * Math.PI / 180));
+      const dY = radiusKm / 110.574;
+      for (let i = 0; i < points; i++) {
+        const θ = 2 * Math.PI * i / points;
+        coords.push([lon + dX * Math.cos(θ), lat + dY * Math.sin(θ)]);
+      }
+      coords.push(coords[0]);
+      return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] } };
+    }
 
-const map = new mapboxgl.Map({
-  container: 'map',
-  style: 'mapbox://styles/mapbox/satellite-streets-v12',   /* FIXED — labels visible */
-  projection: 'globe',
-  zoom: 1.5,
-  center: [39.271406, -7.04695]
-});
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYXJjaHdydGgiLCJhIjoiY21hZHZpb3Y0MDB3czJxcjZxNjMyNjV5ayJ9.Z5pVSBUcI3HDeALtF6YIiA';
 
-map.on('style.load', () => map.setFog({}));
-
-map.on('load', () => {
-
-  /* KOPPEN */
-  map.addSource('koppen', { type:'geojson', data:'./koppen.json' });
-  map.addLayer({
-    id:'koppen-layer',
-    type:'fill',
-    source:'koppen',
-    paint:{ 'fill-color':['get','fill'], 'fill-opacity':0.6 }
-  });
-
-  /* PINS */
-  fetch('pins.json')
-    .then(r => r.json())
-    .then(points => {
-      points.forEach(pt => {
-        const coords = [pt.longitude, pt.latitude];
-
-        let zoneLines = "";
-        if (pt.zones) {
-          zoneLines = pt.zones.map(z => {
-            const bright = brightnessFromHex(z.colour) >= BRIGHTNESS_THRESHOLD;
-            const cls = bright ? 'zone-text stroke' : 'zone-text';
-            return `<span class="${cls}" style="color:${z.colour};">${z.text}</span>`;
-          }).join("<br>");
-        }
-
-        const popup =
-          `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">
-            <div style="font-weight:700;text-align:center;font-size:17px;margin-bottom:4px;">
-              ${pt.title}
-            </div>
-            ${pt.address || ''}<br>
-            ${zoneLines}<br>
-            ${pt.gdpr ? '<em>Marked area not exact.</em><br>' : ''}
-            ${pt.imageUrl ?
-              `<div style="text-align:center;"><img class="popup-image" src="${pt.imageUrl}"></div>` :
-              ''
-            }
-          </a>`;
-
-        new mapboxgl.Marker({ color:'#FCF5E3' })
-          .setLngLat(coords)
-          .setPopup(new mapboxgl.Popup().setHTML(popup))
-          .addTo(map);
-
-        if (pt.gdpr) {
-          const id = `circle-${pt.id}`;
-          const circle = createGeoJSONCircle(coords, pt.radiusKm);
-
-          map.addSource(id, { type:'geojson', data:circle });
-          map.addLayer({
-            id:`${id}-fill`,
-            type:'fill',
-            source:id,
-            paint:{ 'fill-color':'#ffffff', 'fill-opacity':0.15 }
-          });
-          map.addLayer({
-            id:`${id}-line`,
-            type:'line',
-            source:id,
-            paint:{ 'line-color':'#ffffff', 'line-width':1 }
-          });
-        }
-      });
+    const map = new mapboxgl.Map({
+      container: 'map',
+      // satellite + labels, so place names actually exist
+      style: 'mapbox://styles/mapbox/satellite-streets-v12',
+      projection: 'globe',
+      zoom: 1.5,
+      center: [39.271406, -7.046950],
+      pitch: 0,
+      bearing: 0
     });
 
-  /* Navigation */
-  map.addControl(new mapboxgl.NavigationControl({showCompass:false}), 'top-right');
+    map.on('style.load', () => map.setFog({}));
 
-  /* LABEL OPACITY */
-  const symbolLayers = map.getStyle().layers
-    .filter(l => l.type === "symbol")
-    .map(l => l.id);
+    map.on('load', () => {
+      // --- Köppen polygons ---
+      map.addSource('koppen', { type: 'geojson', data: './koppen.json' });
+      map.addLayer({
+        id: 'koppen-layer',
+        type: 'fill',
+        source: 'koppen',
+        paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.6 }
+      });
 
-  const labelSlider = document.getElementById('labelSlider');
-  function setLabelOpacity(v) {
-    const val = parseFloat(v);
-    symbolLayers.forEach(id => {
-      if (map.getLayer(id)) {
-        if (map.getPaintProperty(id,'text-opacity') !== undefined)
-          map.setPaintProperty(id,'text-opacity', val);
-        if (map.getPaintProperty(id,'icon-opacity') !== undefined)
-          map.setPaintProperty(id,'icon-opacity', val);
+      // --- Pins ---
+      fetch('pins.json')
+        .then(res => res.json())
+        .then(points => {
+          points.forEach(pt => {
+            const coords = [pt.longitude, pt.latitude];
+
+            let zoneLines = "";
+            if (pt.zones && Array.isArray(pt.zones)) {
+              zoneLines = pt.zones.map(z => {
+                const bright = brightnessFromHex(z.colour) >= BRIGHTNESS_THRESHOLD;
+                const cls = bright ? 'zone-text stroke' : 'zone-text';
+                return `<span class="${cls}" style="color:${z.colour};">${z.text}</span>`;
+              }).join('<br>');
+            } else if (pt.zoneText && pt.zoneColour) {
+              const bright = brightnessFromHex(pt.zoneColour) >= BRIGHTNESS_THRESHOLD;
+              const cls = bright ? 'zone-text stroke' : 'zone-text';
+              zoneLines = `<span class="${cls}" style="color:${pt.zoneColour};">${pt.zoneText}</span>`;
+            }
+
+            const popupHtml =
+              `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">` +
+              `<div style="font-weight:700; line-height:1.3; text-align:center; font-size:17px; margin-bottom:4px;">${pt.title}</div>` +
+              (pt.address ? `${pt.address}<br>` : '') +
+              `${zoneLines}<br>` +
+              (pt.gdpr ? '<em>Marked area is not exact.</em><br>' : '') +
+              (pt.imageUrl ? `
+                <div style="text-align:center;">
+                  <img class="popup-image" src="${pt.imageUrl}" alt="${pt.title}" />
+                </div>` : '') +
+              `</a>`;
+
+            new mapboxgl.Marker({ color: '#FCF5E3' })
+              .setLngLat(coords)
+              .setPopup(new mapboxgl.Popup().setHTML(popupHtml))
+              .addTo(map);
+
+            if (pt.gdpr) {
+              const circle = createGeoJSONCircle(coords, pt.radiusKm);
+              const id = `circle-${pt.id}`;
+              map.addSource(id, { type: 'geojson', data: circle });
+              map.addLayer({
+                id: `${id}-fill`,
+                type: 'fill',
+                source: id,
+                paint: { 'fill-color': '#ffffff', 'fill-opacity': 0.15 }
+              });
+              map.addLayer({
+                id: `${id}-line`,
+                type: 'line',
+                source: id,
+                paint: { 'line-color': '#ffffff', 'line-width': 1 }
+              });
+            }
+          });
+        });
+
+      // --- Navigation control ---
+      map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
+
+      // --- Label opacity + Koppen opacity tied to slider ---
+      const slider = document.getElementById('opacitySlider');
+      const symbolLayers = map.getStyle().layers
+        .filter(l => l.type === 'symbol')
+        .map(l => l.id);
+
+      function applyOpacity(value) {
+        const v = parseFloat(value);
+        if (map.getLayer('koppen-layer')) {
+          map.setPaintProperty('koppen-layer', 'fill-opacity', v);
+        }
+        symbolLayers.forEach(id => {
+          if (map.getLayer(id)) {
+            if (map.getPaintProperty(id, 'text-opacity') !== undefined) {
+              map.setPaintProperty(id, 'text-opacity', v);
+            }
+            if (map.getPaintProperty(id, 'icon-opacity') !== undefined) {
+              map.setPaintProperty(id, 'icon-opacity', v);
+            }
+          }
+        });
+      }
+
+      applyOpacity(slider.value);
+      slider.addEventListener('input', e => applyOpacity(e.target.value));
+    });
+
+    // --- Autocomplete search using Mapbox Geocoding REST API ---
+    const searchInput = document.getElementById('searchInput');
+    const suggestionsEl = document.getElementById('searchSuggestions');
+    let searchTimeout = null;
+
+    function clearSuggestions() {
+      suggestionsEl.innerHTML = '';
+      suggestionsEl.style.display = 'none';
+    }
+
+    function goToFeature(feature) {
+      if (!feature || !feature.center) return;
+      const [lon, lat] = feature.center;
+      map.flyTo({ center: [lon, lat], zoom: 10 });
+
+      if (window._searchMarker) window._searchMarker.remove();
+      window._searchMarker = new mapboxgl.Marker({ color: '#ffcc00' })
+        .setLngLat([lon, lat])
+        .addTo(map);
+
+      clearSuggestions();
+    }
+
+    async function fetchSuggestions(query) {
+      const center = map.getCenter();
+      const url =
+        'https://api.mapbox.com/geocoding/v5/mapbox.places/' +
+        encodeURIComponent(query) +
+        '.json?access_token=' + mapboxgl.accessToken +
+        '&autocomplete=true&limit=5&proximity=' +
+        center.lng + ',' + center.lat;
+
+      const res = await fetch(url);
+      const data = await res.json();
+      return data.features || [];
+    }
+
+    async function handleSearchInput(value) {
+      const q = value.trim();
+      if (q.length < 3) {
+        clearSuggestions();
+        return;
+      }
+
+      const features = await fetchSuggestions(q);
+      suggestionsEl.innerHTML = '';
+
+      if (!features.length) {
+        const div = document.createElement('div');
+        div.className = 'suggestion-item disabled';
+        div.textContent = 'No results';
+        suggestionsEl.appendChild(div);
+        suggestionsEl.style.display = 'block';
+        return;
+      }
+
+      features.forEach(f => {
+        const div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.textContent = f.place_name;
+        div.addEventListener('click', () => {
+          searchInput.value = f.text || q;
+          goToFeature(f);
+        });
+        suggestionsEl.appendChild(div);
+      });
+
+      suggestionsEl.style.display = 'block';
+    }
+
+    searchInput.addEventListener('input', e => {
+      if (searchTimeout) clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => handleSearchInput(e.target.value), 250);
+    });
+
+    searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const first = suggestionsEl.querySelector('.suggestion-item:not(.disabled)');
+        if (first) {
+          first.click();
+        } else {
+          handleSearchInput(searchInput.value);
+        }
       }
     });
-  }
-  labelSlider.addEventListener('input', e => setLabelOpacity(e.target.value));
-  setLabelOpacity(labelSlider.value);
 
-  /* KOPPEN OPACITY */
-  const koppenSlider = document.getElementById('koppenSlider');
-  function setKoppenOpacity(v) {
-    if (map.getLayer('koppen-layer'))
-      map.setPaintProperty('koppen-layer','fill-opacity', parseFloat(v));
-  }
-  koppenSlider.addEventListener('input', e => setKoppenOpacity(e.target.value));
-  setKoppenOpacity(koppenSlider.value);
-});
+    // --- UI toggles ---
+    document.getElementById('toggleOpacity').addEventListener('click', () => {
+      const el = document.getElementById('opacityControls');
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    });
 
-/* Sidebar toggles */
-document.getElementById('toggleOpacity').addEventListener('click', () => {
-  const el = document.getElementById('opacityControls');
-  el.style.display = el.style.display === 'block' ? 'none' : 'block';
-});
-document.getElementById('toggleLegend').addEventListener('click', () => {
-  const el = document.getElementById('legendContainer');
-  el.style.display = el.style.display === 'block' ? 'none' : 'block';
-});
-
-/* SEARCH FUNCTION */
-async function searchPlace(query) {
-  const url =
-    "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
-    encodeURIComponent(query) +
-    ".json?access_token=" + mapboxgl.accessToken +
-    "&autocomplete=true&limit=5";
-
-  const r = await fetch(url);
-  const j = await r.json();
-  if (!j.features || j.features.length === 0) return;
-
-  const f = j.features[0];
-  const [lon, lat] = f.center;
-
-  map.flyTo({ center:[lon,lat], zoom:6 });
-
-  if (window._searchMarker) window._searchMarker.remove();
-  window._searchMarker = new mapboxgl.Marker({ color:"#ffcc00" })
-    .setLngLat([lon,lat])
-    .addTo(map);
-}
-
-document.getElementById("searchInput")
-  .addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-      searchPlace(e.target.value.trim());
-    }
-  });
-</script>
-
+    document.getElementById('toggleLegend').addEventListener('click', () => {
+      const el = document.getElementById('legendContainer');
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    });
+  </script>
 </body>
 </html>
