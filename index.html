@@ -337,4 +337,92 @@
     }
 
     function goToFeature(feature) {
-      if (!feature || !feature.center) re
+      if (!feature || !feature.center) return;
+      const [lon, lat] = feature.center;
+      map.flyTo({ center: [lon, lat], zoom: 10 });
+
+      if (window._searchMarker) window._searchMarker.remove();
+      window._searchMarker = new mapboxgl.Marker({ color: '#ffcc00' })
+        .setLngLat([lon, lat])
+        .addTo(map);
+
+      clearSuggestions();
+    }
+
+    async function fetchSuggestions(query) {
+      const center = map.getCenter();
+      const url =
+        'https://api.mapbox.com/geocoding/v5/mapbox.places/' +
+        encodeURIComponent(query) +
+        '.json?access_token=' + mapboxgl.accessToken +
+        '&autocomplete=true&limit=5&proximity=' +
+        center.lng + ',' + center.lat;
+
+      const res = await fetch(url);
+      const data = await res.json();
+      return data.features || [];
+    }
+
+    async function handleSearchInput(value) {
+      const q = value.trim();
+      if (q.length < 3) {
+        clearSuggestions();
+        return;
+      }
+
+      const features = await fetchSuggestions(q);
+      suggestionsEl.innerHTML = '';
+
+      if (!features.length) {
+        const div = document.createElement('div');
+        div.className = 'suggestion-item disabled';
+        div.textContent = 'No results';
+        suggestionsEl.appendChild(div);
+        suggestionsEl.style.display = 'block';
+        return;
+      }
+
+      features.forEach(f => {
+        const div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.textContent = f.place_name;
+        div.addEventListener('click', () => {
+          searchInput.value = f.text || q;
+          goToFeature(f);
+        });
+        suggestionsEl.appendChild(div);
+      });
+
+      suggestionsEl.style.display = 'block';
+    }
+
+    searchInput.addEventListener('input', e => {
+      if (searchTimeout) clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => handleSearchInput(e.target.value), 250);
+    });
+
+    searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const first = suggestionsEl.querySelector('.suggestion-item:not(.disabled)');
+        if (first) {
+          first.click();
+        } else {
+          handleSearchInput(searchInput.value);
+        }
+      }
+    });
+
+    // --- UI toggles ---
+    document.getElementById('toggleOpacity').addEventListener('click', () => {
+      const el = document.getElementById('opacityControls');
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    });
+
+    document.getElementById('toggleLegend').addEventListener('click', () => {
+      const el = document.getElementById('legendContainer');
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    });
+  </script>
+</body>
+</html>
