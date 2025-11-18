@@ -11,52 +11,70 @@
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700;900&display=swap" rel="stylesheet">
 
   <style>
-    html, body,
-    #controlWrapper,
-    .toggle-button,
-    #opacityControls,
-    #legendContainer,
-    input[type=range],
-    .mapboxgl-ctrl,
-    .mapboxgl-popup-content {
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
       font-family: 'Ubuntu', sans-serif !important;
     }
 
-    html, body { margin: 0; padding: 0; height: 100%; }
-    #map { width: 100%; height: 100%; }
+    #map {
+      width: 100%;
+      height: 100%;
+    }
 
-    #controlWrapper {
+    /* SEARCH BOX */
+    #searchBox {
       position: absolute;
       top: 10px;
-      left: 10px;
+      right: 10px;
+      z-index: 3000;
+      background: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.15);
+      width: 240px;
+    }
+
+    #searchInput {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-size: 14px;
+    }
+
+    /* MAIN CONTROL PANEL */
+    #controlWrapper {
+      position: absolute;
+      top: 65px;  /* sits BELOW search box */
+      right: 10px;
+      left: auto;
       background: white;
       padding: 8px 12px;
       border-radius: 6px;
       box-shadow: 0 0 6px rgba(0,0,0,0.15);
-      z-index: 1000;
-      max-width: 300px;
+      z-index: 2000;
+      max-width: 260px;
     }
 
     .toggle-button {
-      cursor: pointer;
       background: none;
       border: none;
-      font-size: 18px;
+      cursor: pointer;
+      font-size: 17px;
       padding: 6px 0;
       text-align: left;
       width: 100%;
     }
 
-    #opacityControls,
-    #legendContainer {
+    #opacityControls, #legendContainer {
       display: none;
       margin-top: 6px;
     }
 
     #legendContainer img {
-      height: 40vh;
-      width: auto;
-      max-width: 100%;
+      width: 100%;
+      max-height: 40vh;
       object-fit: contain;
       display: block;
       margin: 0 auto;
@@ -78,65 +96,46 @@
         0 0.3px 0 rgba(0,0,0,0.85),
         0 -0.3px 0 rgba(0,0,0,0.85);
     }
-
-    /* Search box */
-    #searchBox {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      transform: translateY(60px);
-      background: white;
-      padding: 6px 10px;
-      border-radius: 6px;
-      box-shadow: 0 0 6px rgba(0,0,0,0.15);
-      z-index: 2000;
-      width: 240px;
-    }
-
-    #searchInput {
-      width: 100%;
-      border: none;
-      outline: none;
-      font-size: 14px;
-      background: transparent;
-    }
   </style>
 </head>
+
 <body>
 
-  <div id="map"></div>
+<div id="map"></div>
 
-  <div id="searchBox">
-    <input id="searchInput" placeholder="Search place…">
-  </div>
+<!-- SEARCH BOX -->
+<div id="searchBox">
+  <input id="searchInput" placeholder="Search place…">
+</div>
 
-  <div id="controlWrapper">
-    <button id="toggleOpacity" class="toggle-button">Show Opacity Controls</button>
+<!-- CONTROL PANEL -->
+<div id="controlWrapper">
+  <button id="toggleOpacity" class="toggle-button">Show Opacity Controls</button>
 
-    <div id="opacityControls">
-      <div style="margin-bottom:6px;">
-        <div style="font-size:14px;">Climate Layer</div>
-        <input type="range" id="koppenSlider" min="0" max="1" step="0.05" value="0.6">
-      </div>
-
-      <div>
-        <div style="font-size:14px;">Place Names & Labels</div>
-        <input type="range" id="labelSlider" min="0" max="1" step="0.05" value="1">
-      </div>
+  <div id="opacityControls">
+    <div style="margin-bottom:6px;">
+      <div style="font-size:14px;">Climate Layer</div>
+      <input type="range" id="koppenSlider" min="0" max="1" step="0.05" value="0.6">
     </div>
 
-    <button id="toggleLegend" class="toggle-button">Show Legend</button>
-    <div id="legendContainer">
-      <img src="./legend.jpg" alt="Climate Zones Legend">
+    <div>
+      <div style="font-size:14px;">Place Names & Labels</div>
+      <input type="range" id="labelSlider" min="0" max="1" step="0.05" value="1">
     </div>
   </div>
+
+  <button id="toggleLegend" class="toggle-button">Show Legend</button>
+  <div id="legendContainer">
+    <img src="./legend.jpg" alt="Climate Zones Legend">
+  </div>
+</div>
 
 <script>
-/* Brightness helper */
+/* Helpers */
 function hexToRgb(hex) {
   if (!hex) return null;
   let c = hex.replace('#','');
-  if (c.length === 3) c = c.split('').map(h => h+h).join('');
+  if (c.length === 3) c = c.split('').map(x => x+x).join('');
   const n = parseInt(c,16);
   return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
 }
@@ -148,9 +147,8 @@ function brightnessFromHex(hex) {
 }
 const BRIGHTNESS_THRESHOLD = 0.75;
 
-/* Draw GDPR circle */
 function createGeoJSONCircle(center, radiusKm, points = 64) {
-  const [lon,lat] = center;
+  const [lon, lat] = center;
   const coords = [];
   const dX = radiusKm / (111.32 * Math.cos(lat * Math.PI/180));
   const dY = radiusKm / 110.574;
@@ -159,14 +157,16 @@ function createGeoJSONCircle(center, radiusKm, points = 64) {
     coords.push([lon + dX * Math.cos(t), lat + dY * Math.sin(t)]);
   }
   coords.push(coords[0]);
-  return { type:'Feature', geometry:{ type:'Polygon', coordinates:[coords] } };
+  return { type:'Feature', geometry:{ type:'Polygon', coordinates:[coords] }};
 }
 
-mapboxgl.accessToken = 'pk.eyJ1IjoiYXJjaHdydGgiLCJhIjoiY21hZHZpb3Y0MDB3czJxcjZxNjMyNjV5ayJ9.Z5pVSBUcI3HDeALtF6YIiA';
+/* Map init */
+mapboxgl.accessToken =
+  'pk.eyJ1IjoiYXJjaHdydGgiLCJhIjoiY21hZHZpb3Y0MDB3czJxcjZxNjMyNjV5ayJ9.Z5pVSBUcI3HDeALtF6YIiA';
 
 const map = new mapboxgl.Map({
   container: 'map',
-  style: 'mapbox://styles/mapbox/satellite-v9',
+  style: 'mapbox://styles/mapbox/satellite-streets-v12',   /* FIXED — labels visible */
   projection: 'globe',
   zoom: 1.5,
   center: [39.271406, -7.04695]
@@ -176,6 +176,7 @@ map.on('style.load', () => map.setFog({}));
 
 map.on('load', () => {
 
+  /* KOPPEN */
   map.addSource('koppen', { type:'geojson', data:'./koppen.json' });
   map.addLayer({
     id:'koppen-layer',
@@ -184,88 +185,96 @@ map.on('load', () => {
     paint:{ 'fill-color':['get','fill'], 'fill-opacity':0.6 }
   });
 
-  fetch('pins.json').then(r => r.json()).then(points => {
-    points.forEach(pt => {
-      const coords = [pt.longitude, pt.latitude];
+  /* PINS */
+  fetch('pins.json')
+    .then(r => r.json())
+    .then(points => {
+      points.forEach(pt => {
+        const coords = [pt.longitude, pt.latitude];
 
-      let zoneLines = "";
-      if (pt.zones && Array.isArray(pt.zones)) {
-        zoneLines = pt.zones.map(z => {
-          const bright = brightnessFromHex(z.colour) >= BRIGHTNESS_THRESHOLD;
-          const cls = bright ? 'zone-text stroke' : 'zone-text';
-          return `<span class="${cls}" style="color:${z.colour};">${z.text}</span>`;
-        }).join('<br>');
-      }
+        let zoneLines = "";
+        if (pt.zones) {
+          zoneLines = pt.zones.map(z => {
+            const bright = brightnessFromHex(z.colour) >= BRIGHTNESS_THRESHOLD;
+            const cls = bright ? 'zone-text stroke' : 'zone-text';
+            return `<span class="${cls}" style="color:${z.colour};">${z.text}</span>`;
+          }).join("<br>");
+        }
 
-      const popupHtml =
-        `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">
-          <div style="font-weight:700;text-align:center;font-size:17px;margin-bottom:4px;">${pt.title}</div>
-          ${pt.address || ''}<br>
-          ${zoneLines}<br>
-          ${pt.gdpr ? '<em>Marked area not exact.</em><br>' : ''}
-          ${pt.imageUrl ? `<div style="text-align:center;"><img class="popup-image" src="${pt.imageUrl}"></div>` : ''}
-        </a>`;
+        const popup =
+          `<a href="${pt.link}" target="_blank" rel="noopener noreferrer">
+            <div style="font-weight:700;text-align:center;font-size:17px;margin-bottom:4px;">
+              ${pt.title}
+            </div>
+            ${pt.address || ''}<br>
+            ${zoneLines}<br>
+            ${pt.gdpr ? '<em>Marked area not exact.</em><br>' : ''}
+            ${pt.imageUrl ?
+              `<div style="text-align:center;"><img class="popup-image" src="${pt.imageUrl}"></div>` :
+              ''
+            }
+          </a>`;
 
-      new mapboxgl.Marker({color:'#FCF5E3'})
-        .setLngLat(coords)
-        .setPopup(new mapboxgl.Popup().setHTML(popupHtml))
-        .addTo(map);
+        new mapboxgl.Marker({ color:'#FCF5E3' })
+          .setLngLat(coords)
+          .setPopup(new mapboxgl.Popup().setHTML(popup))
+          .addTo(map);
 
-      if (pt.gdpr) {
-        const id = `circle-${pt.id}`;
-        const circle = createGeoJSONCircle(coords, pt.radiusKm);
+        if (pt.gdpr) {
+          const id = `circle-${pt.id}`;
+          const circle = createGeoJSONCircle(coords, pt.radiusKm);
 
-        map.addSource(id, { type:'geojson', data:circle });
-        map.addLayer({
-          id:`${id}-fill`,
-          type:'fill',
-          source:id,
-          paint:{ 'fill-color':'#ffffff', 'fill-opacity':0.15 }
-        });
-        map.addLayer({
-          id:`${id}-line`,
-          type:'line',
-          source:id,
-          paint:{ 'line-color':'#ffffff', 'line-width':1 }
-        });
-      }
+          map.addSource(id, { type:'geojson', data:circle });
+          map.addLayer({
+            id:`${id}-fill`,
+            type:'fill',
+            source:id,
+            paint:{ 'fill-color':'#ffffff', 'fill-opacity':0.15 }
+          });
+          map.addLayer({
+            id:`${id}-line`,
+            type:'line',
+            source:id,
+            paint:{ 'line-color':'#ffffff', 'line-width':1 }
+          });
+        }
+      });
     });
-  });
 
+  /* Navigation */
   map.addControl(new mapboxgl.NavigationControl({showCompass:false}), 'top-right');
 
-  /* Collect symbol (label) layers */
+  /* LABEL OPACITY */
   const symbolLayers = map.getStyle().layers
-    .filter(l => l.type === 'symbol')
+    .filter(l => l.type === "symbol")
     .map(l => l.id);
 
-  /* Koppen opacity */
-  const koppenSlider = document.getElementById('koppenSlider');
-  function setKoppenOpacity(v) {
-    if (map.getLayer('koppen-layer'))
-      map.setPaintProperty('koppen-layer','fill-opacity',parseFloat(v));
-  }
-  koppenSlider.addEventListener('input', e => setKoppenOpacity(e.target.value));
-  setKoppenOpacity(koppenSlider.value);
-
-  /* Label opacity */
   const labelSlider = document.getElementById('labelSlider');
   function setLabelOpacity(v) {
     const val = parseFloat(v);
     symbolLayers.forEach(id => {
       if (map.getLayer(id)) {
         if (map.getPaintProperty(id,'text-opacity') !== undefined)
-          map.setPaintProperty(id,'text-opacity',val);
+          map.setPaintProperty(id,'text-opacity', val);
         if (map.getPaintProperty(id,'icon-opacity') !== undefined)
-          map.setPaintProperty(id,'icon-opacity',val);
+          map.setPaintProperty(id,'icon-opacity', val);
       }
     });
   }
   labelSlider.addEventListener('input', e => setLabelOpacity(e.target.value));
   setLabelOpacity(labelSlider.value);
+
+  /* KOPPEN OPACITY */
+  const koppenSlider = document.getElementById('koppenSlider');
+  function setKoppenOpacity(v) {
+    if (map.getLayer('koppen-layer'))
+      map.setPaintProperty('koppen-layer','fill-opacity', parseFloat(v));
+  }
+  koppenSlider.addEventListener('input', e => setKoppenOpacity(e.target.value));
+  setKoppenOpacity(koppenSlider.value);
 });
 
-/* Toggle UI panels */
+/* Sidebar toggles */
 document.getElementById('toggleOpacity').addEventListener('click', () => {
   const el = document.getElementById('opacityControls');
   el.style.display = el.style.display === 'block' ? 'none' : 'block';
@@ -275,7 +284,7 @@ document.getElementById('toggleLegend').addEventListener('click', () => {
   el.style.display = el.style.display === 'block' ? 'none' : 'block';
 });
 
-/* Custom autocomplete search */
+/* SEARCH FUNCTION */
 async function searchPlace(query) {
   const url =
     "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
@@ -283,26 +292,27 @@ async function searchPlace(query) {
     ".json?access_token=" + mapboxgl.accessToken +
     "&autocomplete=true&limit=5";
 
-  const res = await fetch(url);
-  const json = await res.json();
-  if (!json.features || json.features.length === 0) return;
+  const r = await fetch(url);
+  const j = await r.json();
+  if (!j.features || j.features.length === 0) return;
 
-  const f = json.features[0];
+  const f = j.features[0];
   const [lon, lat] = f.center;
 
-  map.flyTo({ center: [lon, lat], zoom: 6 });
+  map.flyTo({ center:[lon,lat], zoom:6 });
 
   if (window._searchMarker) window._searchMarker.remove();
-  window._searchMarker = new mapboxgl.Marker({ color: "#ffcc00" })
-    .setLngLat([lon, lat])
+  window._searchMarker = new mapboxgl.Marker({ color:"#ffcc00" })
+    .setLngLat([lon,lat])
     .addTo(map);
 }
 
-document.getElementById("searchInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    searchPlace(e.target.value.trim());
-  }
-});
+document.getElementById("searchInput")
+  .addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      searchPlace(e.target.value.trim());
+    }
+  });
 </script>
 
 </body>
