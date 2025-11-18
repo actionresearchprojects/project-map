@@ -95,17 +95,6 @@
         -0.21px -0.21px 0 rgba(0,0,0,0.85);
     }
 
-    @media (max-width: 600px) {
-      #controlWrapper {
-        max-width: 200px;
-        padding: 6px 10px;
-      }
-      .toggle-button {
-        font-size: 14px;
-        padding: 4px 0;
-      }
-    }
-
     /* Search UI */
     #searchBox {
       position: absolute;
@@ -166,18 +155,11 @@
   </div>
 
   <div id="controlWrapper">
-    <button id="toggleOpacity" class="toggle-button">Show Climate & Labels</button>
+    <button id="toggleOpacity" class="toggle-button">Show Climate</button>
 
     <div id="opacityControls">
-      <div style="margin-bottom:6px;">
-        <label style="font-size:14px;">Climate opacity</label>
-        <input type="range" id="climateSlider" min="0" max="1" step="0.05" value="0.6">
-      </div>
-
-      <div>
-        <label style="font-size:14px;">Labels opacity</label>
-        <input type="range" id="labelSlider" min="0" max="1" step="0.05" value="0.6">
-      </div>
+      <label style="font-size:14px;">Climate opacity</label>
+      <input type="range" id="climateSlider" min="0" max="1" step="0.05" value="0.6">
     </div>
 
     <button id="toggleLegend" class="toggle-button">Show Legend</button>
@@ -299,12 +281,7 @@
         'top-right'
       );
 
-      const symbolLayers = map.getStyle().layers
-        .filter(l => l.type === 'symbol')
-        .map(l => l.id);
-
       const climateSlider = document.getElementById('climateSlider');
-      const labelSlider = document.getElementById('labelSlider');
 
       climateSlider.addEventListener('input', e => {
         const v = parseFloat(e.target.value);
@@ -313,22 +290,7 @@
         }
       });
 
-      labelSlider.addEventListener('input', e => {
-        const v = parseFloat(e.target.value);
-        symbolLayers.forEach(id => {
-          if (map.getLayer(id)) {
-            if (map.getPaintProperty(id, 'text-opacity') !== undefined) {
-              map.setPaintProperty(id, 'text-opacity', v);
-            }
-            if (map.getPaintProperty(id, 'icon-opacity') !== undefined) {
-              map.setPaintProperty(id, 'icon-opacity', v);
-            }
-          }
-        });
-      });
-
       climateSlider.dispatchEvent(new Event('input'));
-      labelSlider.dispatchEvent(new Event('input'));
     });
 
     const searchInput = document.getElementById('searchInput');
