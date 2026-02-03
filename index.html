@@ -361,9 +361,9 @@
                 `;
                 el.style.cursor = 'pointer';
                 
-                new mapboxgl.Marker({ element: el, anchor: 'center', offset: [0, -20] })
+                new mapboxgl.Marker({ element: el, anchor: 'center', offset: [0, -10] })
                   .setLngLat(coords)
-                  .setPopup(new mapboxgl.Popup({ offset: 56 }).setHTML(popupHtml))
+                  .setPopup(new mapboxgl.Popup({ offset: 35 }).setHTML(popupHtml))
                   .addTo(map);
 
                 if (st.gdpr) {
