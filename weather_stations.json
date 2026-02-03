@@ -1,0 +1,21 @@
+[
+{
+  "id": "tanzania_kisemvule",
+  "title": "Tanzania, Kisemvule",
+  "link": "https://actionresearchprojects.net/weather-stations/tanzania-kisemvule",
+  "address": "",
+  "zones": [
+    {
+      "code": "Aw",
+      "text": "Tropical savanna (Aw)",
+      "colour": "#45aafa"
+    }
+  ],
+  "latitude": -7.005648368095518,
+  "longitude": 39.26911384833727,
+  "radiusKm": 5,
+  "gdpr": true,
+  "imageUrl": "",
+  "colour": "#006400"
+}
+]
