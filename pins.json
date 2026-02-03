@@ -17,7 +17,7 @@
   "radiusKm": 5,
   "gdpr": true,
   "imageUrl": "https://i.postimg.cc/CMHhhq6b/whatsapp-image-2024-09-02-at-17-27-08.jpg",
-  "colour": "#006400"
+  "colour": "#b80d0d"
 },
 {
   "id": "cevtestunit",
@@ -37,7 +37,7 @@
   "radiusKm": 5,
   "gdpr": true,
   "imageUrl": "https://i.postimg.cc/bJ5sWnq7/66a54350e94d9d93612885188af705a6-XL-2.jpg",
-  "colour": "#006400"
+  "colour": "#b80d0d"
 },
 {
   "id": "deshhouses",
@@ -57,7 +57,7 @@
   "radiusKm": 5,
   "gdpr": true,
   "imageUrl": "https://i.postimg.cc/vHywnPHy/2.jpg",
-  "colour": "#006400"
+  "colour": "#b80d0d"
 },
 {
   "id": "refit_testcells",
@@ -77,6 +77,6 @@
   "radiusKm": 0,
   "gdpr": false,
   "imageUrl": "https://i.postimg.cc/QCycXgBs/PXL-20220611-112628242.jpg",
-  "colour": "#006400"
+  "colour": "#b80d0d"
 }
 ]
