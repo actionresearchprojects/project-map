@@ -252,7 +252,7 @@
                 : '') +
               `</a>`;
 
-            new mapboxgl.Marker({ color: '#FF0000' })
+            new mapboxgl.Marker({ color: pt.colour || '#006400' })
               .setLngLat(coords)
               .setPopup(new mapboxgl.Popup().setHTML(popupHtml))
               .addTo(map);
