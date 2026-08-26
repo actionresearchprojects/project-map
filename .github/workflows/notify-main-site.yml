@@ -5,7 +5,26 @@ on:
     branches: [main]
 
 jobs:
+  # Runs before notify. A malformed pins.json fails here, which blocks the
+  # dispatch below, so the broken file never reaches the live site. Without
+  # this gate a syntax error syncs straight through and the map silently
+  # renders with no pins at all.
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate pins.json
+        run: |
+          if ! jq empty pins.json; then
+            echo "::error file=pins.json::pins.json is not valid JSON - sync blocked."
+            echo "A trailing comma left behind after deleting a field is the usual cause."
+            exit 1
+          fi
+          echo "pins.json OK - $(jq length pins.json) pins."
+
   notify:
+    needs: validate
     runs-on: ubuntu-latest
     steps:
       - name: Trigger main site sync
